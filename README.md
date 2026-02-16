@@ -19,6 +19,21 @@ The dashboard fetches dynamic country/state/city data from:
 
 If the API is unavailable, the app falls back to local seed city data.
 
+
+## Search sources
+
+The scraper now performs site-targeted DuckDuckGo queries across a broad default list, including:
+
+- LinkedIn, Facebook, Instagram, Reddit, X/Twitter, TikTok, YouTube, Pinterest, Threads
+- Medium, Substack, Quora, Tumblr
+- Yelp, Foursquare, Nextdoor, Alignable, Trustpilot
+- Crunchbase, Wellfound, AngelList, About.me
+- Behance, Dribbble, Meetup, Eventbrite
+- Gumtree, Craigslist, YellowPages, Yell, Hotfrog, Manta, Kompass, Clutch
+- Plus Google Maps extraction
+
+Queries include email-intent keywords (e.g. `@gmail.com`, `@outlook.com`, `contact`) to improve contact discovery.
+
 ## Run
 
 ```bash
