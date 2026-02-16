@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lead Scraper Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>Lead Scraper Dashboard</h1>
+
+    <section class="panel">
+      <label for="niches">Enter niches (one per line)</label>
+      <textarea id="niches" rows="6" placeholder="Fitness Trainer&#10;Yoga Instructor"></textarea>
+      <button id="expandNiches">Expand niche ideas</button>
+      <div id="expandedNiches"></div>
+    </section>
+
+    <section class="panel">
+      <label for="country">Country</label>
+      <select id="country"></select>
+
+      <h3>States / Regions (optional)</h3>
+      <div id="states" class="city-grid"></div>
+
+      <h3>Cities</h3>
+      <div id="cities" class="city-grid"></div>
+    </section>
+
+    <section class="panel">
+      <h3>Search options</h3>
+      <label><input type="checkbox" id="includeGoogleMaps" checked /> Include Google Maps search</label>
+    </section>
+
+    <section class="panel">
+      <button id="run">Run scraper</button>
+      <div id="status"></div>
+      <ul id="events"></ul>
+      <h3>Generated files</h3>
+      <ul id="files"></ul>
+    </section>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
