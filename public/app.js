@@ -6,6 +6,7 @@ const eventsEl = document.getElementById("events");
 const filesEl = document.getElementById("files");
 const nichesEl = document.getElementById("niches");
 const expandedNichesEl = document.getElementById("expandedNiches");
+const includeGoogleMapsEl = document.getElementById("includeGoogleMaps");
 
 function selectedValues(container) {
   return [...container.querySelectorAll("input[type='checkbox']:checked")].map((input) => input.value);
@@ -112,6 +113,7 @@ document.getElementById("run").addEventListener("click", async () => {
   const niches = nichesEl.value.split("\n").map((x) => x.trim()).filter(Boolean);
   const states = selectedValues(stateContainer);
   const cities = selectedValues(cityContainer);
+  const includeGoogleMaps = Boolean(includeGoogleMapsEl?.checked);
 
   if (!niches.length || !cities.length) {
     statusEl.textContent = "Select at least one niche and one city.";
@@ -130,7 +132,8 @@ document.getElementById("run").addEventListener("click", async () => {
         country: countryEl.value,
         states,
         cities,
-        niches
+        niches,
+        includeGoogleMaps
       })
     });
 

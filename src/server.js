@@ -130,7 +130,7 @@ app.post("/api/expand-niches", (req, res) => {
 });
 
 app.post("/api/jobs", async (req, res) => {
-  const { country, cities, states = [], niches } = req.body || {};
+  const { country, cities, states = [], niches, includeGoogleMaps = true } = req.body || {};
 
   if (!country || !Array.isArray(cities) || !cities.length || !Array.isArray(niches) || !niches.length) {
     return res.status(400).json({ error: "country, cities, and niches are required." });
@@ -166,7 +166,8 @@ app.post("/api/jobs", async (req, res) => {
       country,
       cities: validCities,
       states: validStates,
-      niches
+      niches,
+      includeGoogleMaps: includeGoogleMaps !== false
     });
 
     job.status = "completed";

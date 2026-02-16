@@ -186,7 +186,7 @@ export class LeadScraper {
     });
   }
 
-  async run({ jobId, country, cities, states = [], niches }) {
+  async run({ jobId, country, cities, states = [], niches, includeGoogleMaps = true }) {
     await this.setupBrowser();
 
     const page = await this.browser.newPage();
@@ -202,7 +202,7 @@ export class LeadScraper {
 
     this.onProgress({
       type: "job-start",
-      message: `Running ${expandedNiches.length} niches across ${this.sites.length} sites in ${country}.`
+      message: `Running ${expandedNiches.length} niches across ${this.sites.length} sites in ${country}. Google Maps: ${includeGoogleMaps ? "on" : "off"}.`
     });
 
     for (const city of cities) {
@@ -224,7 +224,9 @@ export class LeadScraper {
           });
 
           const ddgResults = await this.scrapeSearchPage(page, query);
-          const mapResults = await this.scrapeGoogleMaps(page, `${niche} in ${pair.area ? `${pair.area} ` : ""}${pair.city}`);
+          const mapResults = includeGoogleMaps
+            ? await this.scrapeGoogleMaps(page, `${niche} in ${pair.area ? `${pair.area} ` : ""}${pair.city}`)
+            : [];
 
           const allResults = [...ddgResults, ...mapResults];
           if (!allResults.length) continue;
