@@ -60,3 +60,9 @@ button:hover {
   max-height: 220px;
   overflow-y: auto;
 }
+
+#mapsModeHint {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #4b5563;
+}

@@ -5,7 +5,7 @@ A Node.js dashboard that lets users:
 - Input one or more niches.
 - Expand niches into related role keywords.
 - Select country, states/regions, and city list.
-- Choose whether to include Google Maps search.
+- Choose whether to include Google Maps search (Yes/No dropdown in Search options).
 - Run a background scraper job.
 - Download city-wise TXT lead files from the dashboard.
 

@@ -6,7 +6,7 @@ const eventsEl = document.getElementById("events");
 const filesEl = document.getElementById("files");
 const nichesEl = document.getElementById("niches");
 const expandedNichesEl = document.getElementById("expandedNiches");
-const includeGoogleMapsEl = document.getElementById("includeGoogleMaps");
+const googleMapsModeEl = document.getElementById("googleMapsMode");
 
 function selectedValues(container) {
   return [...container.querySelectorAll("input[type='checkbox']:checked")].map((input) => input.value);
@@ -113,14 +113,14 @@ document.getElementById("run").addEventListener("click", async () => {
   const niches = nichesEl.value.split("\n").map((x) => x.trim()).filter(Boolean);
   const states = selectedValues(stateContainer);
   const cities = selectedValues(cityContainer);
-  const includeGoogleMaps = Boolean(includeGoogleMapsEl?.checked);
+  const includeGoogleMaps = (googleMapsModeEl?.value || "yes") === "yes";
 
   if (!niches.length || !cities.length) {
     statusEl.textContent = "Select at least one niche and one city.";
     return;
   }
 
-  statusEl.textContent = "Starting job...";
+  statusEl.textContent = `Starting job... Google Maps: ${includeGoogleMaps ? "ON" : "OFF"}`;
   eventsEl.innerHTML = "";
   filesEl.innerHTML = "";
 

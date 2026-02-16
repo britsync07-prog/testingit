@@ -30,7 +30,12 @@
 
     <section class="panel">
       <h3>Search options</h3>
-      <label><input type="checkbox" id="includeGoogleMaps" checked /> Include Google Maps search</label>
+      <label for="googleMapsMode">Search on Google Maps</label>
+      <select id="googleMapsMode">
+        <option value="yes" selected>Yes, include Google Maps</option>
+        <option value="no">No, skip Google Maps</option>
+      </select>
+      <p id="mapsModeHint">Tip: choose <strong>No</strong> to speed up scraping and skip Maps requests.</p>
     </section>
 
     <section class="panel">
