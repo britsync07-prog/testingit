@@ -3,7 +3,6 @@ import path from "node:path";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
-import { countryCityMap } from "../data/countries.js";
 import { LeadScraper, expandNiches } from "./scraper.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -45,68 +44,70 @@ function pushEvent(job, event) {
 
 async function fetchJson(url, options = {}) {
   const response = await fetch(url, options);
-  if (!response.ok) {
-    throw new Error(`Failed request ${url}: ${response.status}`);
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok || payload?.error === true) {
+    const message = payload?.msg || payload?.message || `Failed request ${url}: ${response.status}`;
+    throw new Error(message);
   }
-  return response.json();
+
+  return payload;
 }
 
 async function getCountries() {
   if (locationCache.countries) return locationCache.countries;
 
-  try {
-    const data = await fetchJson(`${COUNTRY_API}/countries`);
-    const countries = (data.data || []).map((item) => item.country).filter(Boolean).sort();
-    locationCache.countries = countries;
-    return countries;
-  } catch {
-    const fallback = Object.keys(countryCityMap).sort();
-    locationCache.countries = fallback;
-    return fallback;
-  }
+  const payload = await fetchJson(`${COUNTRY_API}/countries`);
+  const countries = (payload.data || [])
+    .map((item) => item.country)
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b));
+
+  locationCache.countries = countries;
+  return countries;
 }
 
 async function getCountryDetails(country) {
   if (locationCache.details.has(country)) return locationCache.details.get(country);
 
-  const fallback = {
-    states: [],
-    cities: countryCityMap[country] || []
+  const [statesPayload, citiesPayload] = await Promise.all([
+    fetchJson(`${COUNTRY_API}/countries/states`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ country })
+    }),
+    fetchJson(`${COUNTRY_API}/countries/cities`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ country })
+    })
+  ]);
+
+  const states = (statesPayload.data?.states || [])
+    .map((item) => item.name)
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b));
+
+  const cities = (citiesPayload.data || [])
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b));
+
+  const details = {
+    states: Array.from(new Set(states)),
+    cities: Array.from(new Set(cities))
   };
 
-  try {
-    const [statesPayload, citiesPayload] = await Promise.all([
-      fetchJson(`${COUNTRY_API}/countries/states`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ country })
-      }),
-      fetchJson(`${COUNTRY_API}/countries/cities`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ country })
-      })
-    ]);
-
-    const states = (statesPayload.data?.states || []).map((item) => item.name).filter(Boolean);
-    const cities = (citiesPayload.data || []).filter(Boolean);
-
-    const details = {
-      states: Array.from(new Set(states)).sort(),
-      cities: Array.from(new Set(cities)).sort()
-    };
-
-    locationCache.details.set(country, details);
-    return details;
-  } catch {
-    locationCache.details.set(country, fallback);
-    return fallback;
-  }
+  locationCache.details.set(country, details);
+  return details;
 }
 
 app.get("/api/metadata", async (_req, res) => {
-  const countries = await getCountries();
-  res.json({ countries });
+  try {
+    const countries = await getCountries();
+    res.json({ countries, source: COUNTRY_API });
+  } catch (error) {
+    res.status(502).json({ error: `CountriesNow API unavailable: ${error.message}` });
+  }
 });
 
 app.get("/api/location", async (req, res) => {
@@ -115,8 +116,12 @@ app.get("/api/location", async (req, res) => {
     return res.status(400).json({ error: "country query param is required" });
   }
 
-  const details = await getCountryDetails(country);
-  res.json(details);
+  try {
+    const details = await getCountryDetails(country);
+    return res.json({ ...details, source: COUNTRY_API, country });
+  } catch (error) {
+    return res.status(502).json({ error: `CountriesNow API unavailable: ${error.message}` });
+  }
 });
 
 app.post("/api/expand-niches", (req, res) => {
@@ -131,7 +136,13 @@ app.post("/api/jobs", async (req, res) => {
     return res.status(400).json({ error: "country, cities, and niches are required." });
   }
 
-  const details = await getCountryDetails(country);
+  let details;
+  try {
+    details = await getCountryDetails(country);
+  } catch (error) {
+    return res.status(502).json({ error: `CountriesNow API unavailable: ${error.message}` });
+  }
+
   const validCities = cities.filter((city) => details.cities.includes(city));
   const validStates = (Array.isArray(states) ? states : []).filter((state) => details.states.includes(state));
 

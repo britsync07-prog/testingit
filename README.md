@@ -17,7 +17,7 @@ The dashboard fetches dynamic country/state/city data from:
 - `https://countriesnow.space/api/v0.1/countries/states`
 - `https://countriesnow.space/api/v0.1/countries/cities`
 
-If the API is unavailable, the app falls back to local seed city data.
+The dashboard uses these endpoints as the source of truth for countries, states, and cities.
 
 
 ## Search sources
