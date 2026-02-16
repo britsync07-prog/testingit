@@ -45,7 +45,7 @@ The scraper performs site-targeted DuckDuckGo queries across a broad default lis
 - Gumtree, Craigslist, YellowPages, Yell, Hotfrog, Manta, Kompass, Clutch
 - Plus optional Google Maps extraction
 
-## Run
+## Run locally
 
 ```bash
 npm install
@@ -54,6 +54,57 @@ npm start
 
 Open: `http://localhost:3000`
 
+## Host on VPS IP address
+
+The server now binds using:
+
+- `HOST` (default: `0.0.0.0`)
+- `PORT` (default: `3000`)
+
+So it can be exposed directly on your VPS IP.
+
+### 1) Start app on all interfaces
+
+```bash
+HOST=0.0.0.0 PORT=3000 npm start
+```
+
+Then open in browser:
+
+- `http://<YOUR_VPS_PUBLIC_IP>:3000`
+
+### 2) Open firewall/security group
+
+Allow TCP `3000` in:
+
+- VPS firewall (`ufw`/provider firewall)
+- Cloud security group (if applicable)
+
+Example (`ufw`):
+
+```bash
+sudo ufw allow 3000/tcp
+sudo ufw reload
+```
+
+### 3) Run in background (recommended)
+
+Using PM2:
+
+```bash
+npm install -g pm2
+pm2 start "HOST=0.0.0.0 PORT=3000 npm start" --name lead-dashboard
+pm2 save
+pm2 startup
+```
+
+### 4) Verify listening address
+
+```bash
+ss -ltnp | grep 3000
+```
+
+You should see `0.0.0.0:3000`.
 
 ## Reliability during long runs
 

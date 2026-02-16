@@ -10,6 +10,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || "0.0.0.0";
 const COUNTRY_API = "https://countriesnow.space/api/v0.1";
 
 app.use(express.json());
@@ -220,7 +221,7 @@ app.get("/api/jobs/:jobId/files/:fileName", (req, res) => {
   return res.download(filePath);
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, HOST, () => {
   // eslint-disable-next-line no-console
-  console.log(`Dashboard server running on http://localhost:${PORT}`);
+  console.log(`Dashboard server running on http://${HOST}:${PORT}`);
 });
