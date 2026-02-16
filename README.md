@@ -54,6 +54,14 @@ npm start
 
 Open: `http://localhost:3000`
 
+
+## Reliability during long runs
+
+Leads are appended to each city TXT file immediately (`appendFileSync`) as soon as each lead is found.
+This means if the job fails or is interrupted, previously saved leads stay in the file.
+
+The dashboard now receives live `lead-saved` updates and shows file download links during the run (not only at completion).
+
 ## See backend logs live
 
 Run server and stream logs to terminal + file:

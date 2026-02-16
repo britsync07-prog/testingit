@@ -212,6 +212,7 @@ export class LeadScraper {
     }
 
     const seen = new Set();
+    const savedCounts = new Map();
 
     for (const niche of expandedNiches) {
       for (const pair of cityAreas) {
@@ -247,6 +248,20 @@ export class LeadScraper {
               `${"-".repeat(50)}\n`;
 
             fs.appendFileSync(filePath, entry, "utf8");
+
+            const nextCount = (savedCounts.get(fileName) || 0) + 1;
+            savedCounts.set(fileName, nextCount);
+
+            this.onProgress({
+              type: "lead-saved",
+              city: pair.city,
+              niche,
+              area: pair.area,
+              site,
+              fileName,
+              totalSavedForFile: nextCount,
+              message: `Saved lead #${nextCount} to ${fileName}`
+            });
           }
 
           this.onProgress({
@@ -256,6 +271,7 @@ export class LeadScraper {
             area: pair.area,
             site,
             fileName,
+            totalSavedForFile: savedCounts.get(fileName) || 0,
             message: `${niche} / ${pair.city}${pair.area ? ` (${pair.area})` : ""} / ${site} processed.`
           });
         }

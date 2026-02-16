@@ -50,6 +50,17 @@ function showApiMissingHint(error, context) {
   statusEl.textContent = `${context}: ${error.message}. If you opened only static files, start the Node API server with npm start.`;
 }
 
+function ensureFileLink(jobId, fileName) {
+  if (!fileName) return;
+  const existing = filesEl.querySelector(`a[data-file-name="${fileName}"]`);
+  if (existing) return;
+
+  const li = document.createElement("li");
+  li.innerHTML = `<a data-file-name="${fileName}" href="/api/jobs/${jobId}/files/${fileName}">${fileName}</a>`;
+  filesEl.appendChild(li);
+}
+
+
 async function loadCountries() {
   try {
     const metadata = await fetchJson("/api/metadata");
@@ -147,15 +158,18 @@ document.getElementById("run").addEventListener("click", async () => {
       row.textContent = `[${payload.type}] ${payload.message || "update"}`;
       eventsEl.prepend(row);
 
+      if (payload.type === "lead-saved" || payload.type === "city-update") {
+        ensureFileLink(jobId, payload.fileName);
+        if (typeof payload.totalSavedForFile === "number") {
+          statusEl.textContent = `Live update: ${payload.fileName} has ${payload.totalSavedForFile} saved leads`;
+        }
+      }
+
       if (payload.type === "job-complete") {
         statusEl.textContent = "Completed";
         stream.close();
 
-        (payload.files || []).forEach((file) => {
-          const li = document.createElement("li");
-          li.innerHTML = `<a href="/api/jobs/${jobId}/files/${file}">${file}</a>`;
-          filesEl.appendChild(li);
-        });
+        (payload.files || []).forEach((file) => ensureFileLink(jobId, file));
       }
 
       if (payload.type === "job-failed") {
