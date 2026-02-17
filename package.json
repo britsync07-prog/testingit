@@ -1,0 +1,16 @@
+{
+  "name": "lead-scraper-dashboard",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "check": "node --check src/server.js && node --check src/scraper.js",
+    "setup:python": "bash ./scripts/install_python_deps.sh",
+    "postinstall": "npm run setup:python"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "puppeteer": "^23.3.0"
+  }
+}
