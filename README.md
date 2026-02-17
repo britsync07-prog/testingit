@@ -49,10 +49,18 @@ The scraper performs site-targeted DuckDuckGo queries across a broad default lis
 
 The scraping runtime now runs in Python (`src/scraper.py`) and is called by Node (`src/scraper.js` wrapper).
 
-Install Python deps on your VPS/server:
+Python dependencies are declared in `requirements.txt` and are installed automatically on `npm install` via the `postinstall` script.
+
+Manual install command (if needed):
 
 ```bash
-pip install undetected-chromedriver selenium
+npm run setup:python
+```
+
+or directly:
+
+```bash
+python3 -m pip install -r requirements.txt
 ```
 
 Also ensure Chrome/Chromium is installed on the server for Selenium/UC.
