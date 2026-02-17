@@ -45,6 +45,18 @@ The scraper performs site-targeted DuckDuckGo queries across a broad default lis
 - Gumtree, Craigslist, YellowPages, Yell, Hotfrog, Manta, Kompass, Clutch
 - Plus optional Google Maps extraction
 
+## Python scraper engine
+
+The scraping runtime now runs in Python (`src/scraper.py`) and is called by Node (`src/scraper.js` wrapper).
+
+Install Python deps on your VPS/server:
+
+```bash
+pip install undetected-chromedriver selenium
+```
+
+Also ensure Chrome/Chromium is installed on the server for Selenium/UC.
+
 ## Run locally
 
 ```bash
