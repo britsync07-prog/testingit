@@ -7,8 +7,19 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <header class="container header-nav">
+    <nav>
+      <a href="/" class="nav-link active">Scraper</a>
+      <a href="/sender.html" class="nav-link">Sender</a>
+      <a href="/checker.html" class="nav-link">Checker</a>
+    </nav>
+    <div id="userInfo"></div>
+    <button id="logoutBtn">Logout</button>
+  </header>
   <main class="container">
     <h1>Lead Scraper Dashboard</h1>
+
+    <div id="queueStatus" class="panel queue-status"></div>
 
     <section class="panel">
       <label for="niches">Enter niches (one per line)</label>
@@ -22,9 +33,15 @@
       <select id="country"></select>
 
       <h3>States / Regions (optional)</h3>
+      <div class="select-all-container">
+        <input type="checkbox" id="selectAllStates"> <label for="selectAllStates">Select All States</label>
+      </div>
       <div id="states" class="city-grid"></div>
 
       <h3>Cities</h3>
+      <div class="select-all-container">
+        <input type="checkbox" id="selectAllCities"> <label for="selectAllCities">Select All Cities</label>
+      </div>
       <div id="cities" class="city-grid"></div>
     </section>
 
@@ -42,8 +59,13 @@
       <button id="run">Run scraper</button>
       <div id="status"></div>
       <ul id="events"></ul>
-      <h3>Generated files</h3>
+      <h3>Current job files</h3>
       <ul id="files"></ul>
+    </section>
+
+    <section class="panel history-section">
+      <h2>Search History</h2>
+      <div id="history"></div>
     </section>
   </main>
   <script type="module" src="app.js"></script>

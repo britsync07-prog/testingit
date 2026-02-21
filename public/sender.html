@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Sender - Lead Scraper</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="container header-nav">
+    <nav>
+      <a href="/" class="nav-link">Scraper</a>
+      <a href="/sender.html" class="nav-link active">Sender</a>
+      <a href="/checker.html" class="nav-link">Checker</a>
+    </nav>
+    <div id="userInfo"></div>
+    <button id="logoutBtn">Logout</button>
+  </header>
+  <main class="container">
+    <h1>Email Sender</h1>
+
+    <section class="panel">
+      <h3>1. Upload Email List</h3>
+      <p>Upload a .txt file containing one email per line.</p>
+      <input type="file" id="emailFile" accept=".txt" />
+      <div id="fileStats" class="stats-box" style="display: none;">
+        <strong>Emails found:</strong> <span id="emailCount">0</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h3>2. Compose Email</h3>
+      <label for="subject">Subject</label>
+      <input type="text" id="subject" placeholder="Enter email subject" style="width: 100%; padding: 8px; margin-bottom: 16px; border: 1px solid #dbe3ef; border-radius: 4px;">
+      
+      <label for="htmlTemplate">HTML Template</label>
+      <textarea id="htmlTemplate" rows="12" placeholder="<h1>Hello!</h1><p>Your message here...</p>"></textarea>
+      
+      <p style="font-size: 0.85em; color: #666;">Tip: You can use HTML tags to style your email.</p>
+    </section>
+
+    <section class="panel">
+      <button id="sendEmails" class="send-btn" disabled>Send Emails</button>
+      <div id="sendStatus"></div>
+    </section>
+  </main>
+  <script type="module" src="sender.js"></script>
+</body>
+</html>

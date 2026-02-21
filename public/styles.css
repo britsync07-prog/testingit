@@ -55,6 +55,19 @@ button:hover {
   padding: 4px 6px;
 }
 
+.select-all-container {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+.select-all-container input {
+  cursor: pointer;
+}
+
 #events,
 #files {
   max-height: 220px;
@@ -65,4 +78,245 @@ button:hover {
   margin: 8px 0 0;
   font-size: 13px;
   color: #4b5563;
+}
+
+.header-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: #fff;
+  border-bottom: 1px solid #dbe3ef;
+  margin-top: 0;
+  max-width: 100%;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #4b5563;
+  margin-right: 15px;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+
+.nav-link.active {
+  background: #2563eb;
+  color: white;
+  font-weight: bold;
+}
+
+.nav-link:hover:not(.active) {
+  background: #f1f5f9;
+}
+
+.stats-box {
+  margin-top: 15px;
+  padding: 12px;
+  background: #ecfdf5;
+  border: 1px solid #d1fae5;
+  border-radius: 4px;
+  color: #065f46;
+}
+
+.send-btn {
+  background: #6366f1;
+  width: 100%;
+  font-size: 1.1em;
+  font-weight: bold;
+  padding: 12px;
+}
+
+.send-btn:hover {
+  background: #4f46e5;
+}
+
+.send-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.login-panel {
+  max-width: 400px;
+  margin: 100px auto;
+}
+
+.login-panel input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0 16px;
+  border: 1px solid #dbe3ef;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.remember-me input {
+  width: auto;
+  margin: 0;
+}
+
+.error-message {
+  color: #dc2626;
+  margin-top: 10px;
+}
+
+.history-section h2 {
+  margin-top: 0;
+}
+
+.history-item {
+  border-bottom: 1px solid #eee;
+  padding: 10px 0;
+}
+
+.history-item:last-child {
+  border-bottom: none;
+}
+
+.history-meta {
+  font-size: 0.85em;
+  color: #666;
+}
+
+.history-files {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.download-btn {
+  display: inline-block;
+  background: #10b981;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 0.85em;
+  font-weight: bold;
+}
+
+.download-btn:hover {
+  background: #059669;
+}
+
+.status-completed { color: #059669; font-weight: bold; }
+.status-failed { color: #dc2626; font-weight: bold; }
+.status-running { color: #2563eb; font-weight: bold; }
+.status-queued { color: #6b7280; font-weight: bold; }
+.status-stopped { color: #9a3412; font-weight: bold; }
+
+.stop-btn {
+  background: #ef4444;
+  padding: 4px 8px;
+  font-size: 0.8em;
+  margin-left: 10px;
+}
+
+.toggle-btn {
+  background: #6366f1;
+  color: white;
+  padding: 4px 8px;
+  font-size: 0.8em;
+  border-radius: 4px;
+  margin-left: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.toggle-btn:hover {
+  background: #4f46e5;
+}
+
+.email-dropdown {
+  background: #f1f5f9;
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.stop-btn:hover {
+  background: #dc2626;
+}
+
+/* Template Checker Styles */
+.result-badge {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 1.2em;
+  margin-bottom: 16px;
+}
+
+.result-badge.pass {
+  background: #059669;
+  color: white;
+}
+
+.result-badge.fail {
+  background: #dc2626;
+  color: white;
+}
+
+.spam-score-box {
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  font-weight: bold;
+}
+
+.spam-score-box.low {
+  background: #ecfdf5;
+  border: 1px solid #d1fae5;
+  color: #065f46;
+}
+
+.spam-score-box.high {
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  color: #991b1b;
+}
+
+.findings-list {
+  list-style: none;
+  padding: 0;
+}
+
+.findings-list li {
+  padding: 8px;
+  background: #f8fafc;
+  border-bottom: 1px solid #f1f5f9;
+  color: #475569;
+}
+
+.findings-list li:before {
+  content: "• ";
+  color: #ef4444;
+}
+
+.input-group {
+  margin-bottom: 16px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.checker-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #dbe3ef;
+  border-radius: 4px;
+  box-sizing: border-box;
 }

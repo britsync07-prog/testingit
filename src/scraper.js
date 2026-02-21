@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import path from "node:path";
+import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const nicheExpansionDictionary = {
@@ -81,12 +82,24 @@ export class LeadScraper {
     this.outputRoot = outputRoot;
     this.onProgress = onProgress;
     this.sites = Array.from(new Set((sites || []).filter(Boolean)));
+    this.child = null;
+  }
+
+  stop() {
+    if (this.child) {
+      this.child.kill("SIGTERM");
+      return true;
+    }
+    return false;
   }
 
   async run({ jobId, country, cities, states = [], niches, includeGoogleMaps = true }) {
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
     const scriptPath = path.join(__dirname, "scraper.py");
+
+    const venvPython = path.join(__dirname, "..", "venv", "bin", "python3");
+    const pythonCmd = fs.existsSync(venvPython) ? venvPython : "python3";
 
     const payload = {
       outputDir: path.join(this.outputRoot, jobId),
@@ -99,20 +112,29 @@ export class LeadScraper {
     };
 
     return new Promise((resolve, reject) => {
-      const child = spawn("python3", [scriptPath, JSON.stringify(payload)], {
-        stdio: ["ignore", "pipe", "pipe"]
+      this.child = spawn(pythonCmd, [scriptPath, JSON.stringify(payload)], {
+        stdio: ["ignore", "pipe", "pipe"],
+        env: { ...process.env, PYTHONUNBUFFERED: "1" }
       });
 
       let stderr = "";
       let finalResult = null;
 
-      child.stderr.on("data", (chunk) => {
-        stderr += chunk.toString();
+      this.child.stderr.on("data", (chunk) => {
+        const message = chunk.toString();
+        stderr += message;
+        // Also pipe to real-time stderr for visibility in terminal
+        process.stderr.write(message);
       });
 
       let buffer = "";
-      child.stdout.on("data", (chunk) => {
-        buffer += chunk.toString();
+      this.child.stdout.on("data", (chunk) => {
+        const raw = chunk.toString();
+        // Also pipe to real-time stdout for visibility in terminal
+        // but only if it's not JSON, or we can just pipe everything to be safe
+        // Actually, we want to avoid double printing JSON if server.js also prints it.
+        // Let's just push it to the buffer for parsing.
+        buffer += raw;
         const lines = buffer.split("\n");
         buffer = lines.pop() || "";
 
@@ -122,23 +144,24 @@ export class LeadScraper {
 
           try {
             const event = JSON.parse(trimmed);
-            if (event.type === "result") {
+            if (event.type === "result" || event.type === "job-complete" || event.type === "job-completed") {
               finalResult = {
                 files: event.files || [],
                 expandedNiches: event.expandedNiches || expandNiches(niches),
                 sites: event.sites || this.sites
               };
-            } else {
-              this.onProgress(event);
             }
+            // Always pass the event to onProgress so the UI gets it
+            this.onProgress(event);
           } catch {
             this.onProgress({ type: "log", message: trimmed });
           }
         }
       });
 
-      child.on("close", (code) => {
-        if (code !== 0) {
+      this.child.on("close", (code) => {
+        this.child = null;
+        if (code !== 0 && code !== null) { // code is null if killed
           reject(new Error(stderr || `Python scraper exited with code ${code}`));
           return;
         }

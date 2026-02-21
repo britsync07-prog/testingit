@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Lead Scraper</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <section class="panel login-panel">
+      <h1>Lead Scraper Login</h1>
+      <form id="loginForm">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+        <div class="remember-me">
+          <input type="checkbox" id="rememberMe" name="rememberMe">
+          <label for="rememberMe">Remember Me</label>
+        </div>
+        <button type="submit">Login</button>
+      </form>
+      <div id="error" class="error-message"></div>
+    </section>
+  </main>
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = e.target.username.value;
+      const password = e.target.password.value;
+      const rememberMe = e.target.rememberMe.checked;
+      const errorDiv = document.getElementById("error");
+
+      try {
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password, rememberMe })
+        });
+
+        if (response.ok) {
+          window.location.href = "/";
+        } else {
+          const result = await response.json();
+          errorDiv.textContent = result.error || "Login failed";
+        }
+      } catch (error) {
+        errorDiv.textContent = "Something went wrong. Please try again.";
+      }
+    });
+  </script>
+</body>
+</html>

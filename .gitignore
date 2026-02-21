@@ -1,0 +1,29 @@
+# Node modules
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Application data
+data/sessions/
+data/users.json
+data/history.json
+output/
+
+# Python environment
+venv/
+__pycache__/
+*.py[cod]
+
+# Progress files
+search_progress.json
+scrape_progress.json
+
+# Environment variables
+.env
+
+# System files
+.DS_Store
