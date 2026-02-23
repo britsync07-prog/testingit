@@ -168,8 +168,14 @@ async function loadHistory() {
       const date = new Date(job.createdAt).toLocaleString();
       const params = job.params;
       
-      // Filter to only show email files
-      const emailFiles = (job.files || []).filter(f => f.includes("_emails.txt") || f === "all_emails.txt");
+      // Filter to only show email files and map json files
+      const emailFiles = (job.files || []).filter(f => 
+        f.includes("_emails.txt") || 
+        f === "all_emails.txt" || 
+        f === "google_maps_emails.txt" || 
+        f.endsWith(".json")
+      );
+      
       const fileButtons = emailFiles.map(f => `<a data-file-name="${f}" href="/api/jobs/${job.id}/files/${f}" target="_blank" class="download-btn">Download ${f}</a>`).join("");
 
       const isStoppable = job.status === "running" || job.status === "queued";
@@ -183,7 +189,7 @@ async function loadHistory() {
           <br>Niches: ${params.niches.join(", ")}
           <br>Status: <span class="status-${job.status}" id="status-${job.id}">${job.status.toUpperCase()}</span>
           ${stopButton}
-          <button class="toggle-btn" onclick="toggleEmails('${emailListId}')">View Emails</button>
+          <button class="toggle-btn" onclick="toggleEmails('${emailListId}')">View Files</button>
           ${job.error ? `<br><span class="error-message">Error: ${job.error}</span>` : ""}
         </div>
         <div id="${emailListId}" class="history-files email-dropdown" style="display: none;">
@@ -204,7 +210,7 @@ window.toggleEmails = function(id) {
     // Toggle button text if needed
     const btn = el.previousElementSibling.querySelector('.toggle-btn');
     if (btn) {
-        btn.textContent = el.style.display === "none" ? "View Emails" : "Hide Emails";
+        btn.textContent = el.style.display === "none" ? "View Files" : "Hide Files";
     }
   }
 };
@@ -333,7 +339,8 @@ document.getElementById("run").addEventListener("click", async () => {
 
 function ensureFileLink(jobId, fileName) {
   if (!fileName) return;
-  if (!fileName.includes("_emails.txt") && fileName !== "all_emails.txt") return;
+  // UPDATED FILTER: allows google_maps_emails.txt and .json files
+  if (!fileName.includes("_emails.txt") && fileName !== "all_emails.txt" && !fileName.endsWith(".json") && fileName !== "google_maps_emails.txt") return;
   
   // Update Current Job panel
   const existingGlobal = filesEl.querySelector(`a[data-file-name="${fileName}"]`);
