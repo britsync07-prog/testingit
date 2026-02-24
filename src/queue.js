@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const HISTORY_FILE = path.join(__dirname, "..", "data", "history.json");
+const CATEGORIES_FILE = path.join(__dirname, "..", "data", "categories.json");
 
 export class JobQueue {
   constructor(maxConcurrent = 3) {
@@ -14,6 +15,7 @@ export class JobQueue {
     this.activeJobs = new Map();
     this.queuedJobs = [];
     this.jobs = new Map(); // All jobs (active, queued, completed)
+    this.categories = new Map(); // Explicit categories: Map<id, {id, name, userId, createdAt}>
   }
 
   async loadHistory() {
@@ -28,12 +30,22 @@ export class JobQueue {
     } catch {
       await fsPromises.writeFile(HISTORY_FILE, "[]");
     }
+
+    try {
+      const catData = await fsPromises.readFile(CATEGORIES_FILE, "utf-8");
+      const categories = JSON.parse(catData);
+      for (const cat of categories) {
+        this.categories.set(cat.id, cat);
+      }
+    } catch {
+      await fsPromises.writeFile(CATEGORIES_FILE, "[]");
+    }
   }
 
   async saveHistory() {
     const history = Array.from(this.jobs.values()).map(job => {
-        const { listeners, ...rest } = job;
-        return rest;
+      const { listeners, ...rest } = job;
+      return rest;
     });
     await fsPromises.writeFile(HISTORY_FILE, JSON.stringify(history, null, 2));
   }
@@ -85,7 +97,9 @@ export class JobQueue {
         cities: job.params.cities,
         states: job.params.states,
         niches: job.params.niches,
-        includeGoogleMaps: job.params.includeGoogleMaps !== false
+        includeGoogleMaps: job.params.includeGoogleMaps !== false,
+        scrapeMode: job.params.scrapeMode || 'emails',
+        sites: job.params.sites
       });
 
       if (job.status !== "stopped") {
@@ -147,6 +161,12 @@ export class JobQueue {
     if (payload.allEmailsFileName && !job.files.includes(payload.allEmailsFileName)) {
       job.files.push(payload.allEmailsFileName);
     }
+    if (payload.phoneFileName && !job.files.includes(payload.phoneFileName)) {
+      job.files.push(payload.phoneFileName);
+    }
+    if (payload.allPhonesFileName && !job.files.includes(payload.allPhonesFileName)) {
+      job.files.push(payload.allPhonesFileName);
+    }
 
     for (const res of job.listeners) {
       res.write(`data: ${JSON.stringify(payload)}\n\n`);
@@ -175,5 +195,32 @@ export class JobQueue {
     return Array.from(this.jobs.values()).some(
       (job) => job.userId === userId && (job.status === "running" || job.status === "queued")
     );
+  }
+
+  // ── Explicit Category Management ── //
+
+  async saveCategories() {
+    const cats = Array.from(this.categories.values());
+    await fsPromises.writeFile(CATEGORIES_FILE, JSON.stringify(cats, null, 2));
+  }
+
+  addCategory(name, userId) {
+    // Generate an ID for the category (we use a simple slug or timestamp + random)
+    const id = Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
+    const category = {
+      id,
+      name,
+      userId,
+      createdAt: new Date().toISOString()
+    };
+    this.categories.set(id, category);
+    this.saveCategories();
+    return category;
+  }
+
+  getCategories(userId) {
+    return Array.from(this.categories.values())
+      .filter((c) => c.userId === userId)
+      .sort((a, b) => a.name.localeCompare(b.name));
   }
 }

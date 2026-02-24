@@ -37,13 +37,13 @@ app.use(
       path: sessionsDir,
       retries: 5,
       ttl: 30 * 24 * 60 * 60, // 30 days
-      logFn: () => {}, // Silences the retry logs
+      logFn: () => { }, // Silences the retry logs
     }),
     secret: "company-secret-key-12345", // Change this to a secure random string in production
     resave: false,
     saveUninitialized: false,
-    cookie: { 
-      secure: false, 
+    cookie: {
+      secure: false,
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
   })
@@ -83,7 +83,7 @@ app.get("/api/me", (req, res) => {
     const activeJob = Array.from(queue.jobs.values()).find(
       j => j.userId === req.session.user.username && (j.status === "running" || j.status === "queued")
     );
-    return res.json({ 
+    return res.json({
       username: req.session.user.username,
       activeJobId: activeJob ? activeJob.id : null
     });
@@ -160,16 +160,16 @@ app.post("/api/checker/callback", (req, res) => {
   const { requestId, message, details } = req.body;
   console.log(`Received callback for ${requestId}: ${message}`);
   if (!requestId) return res.status(400).json({ error: "requestId is required" });
-  
-  checkerCallbacks.set(requestId, { 
-    message, 
-    details, 
-    timestamp: Date.now() 
+
+  checkerCallbacks.set(requestId, {
+    message,
+    details,
+    timestamp: Date.now()
   });
-  
+
   // Cleanup old callbacks after 10 minutes
   setTimeout(() => checkerCallbacks.delete(requestId), 10 * 60 * 1000);
-  
+
   res.json({ success: true });
 });
 
@@ -209,8 +209,29 @@ app.post("/api/expand-niches", requireAuth, (req, res) => {
   res.json({ expandedNiches: expandNiches(niches) });
 });
 
+app.get("/api/categories", requireAuth, (req, res) => {
+  const categories = queue.getCategories(req.session.user.username);
+  res.json({ categories });
+});
+
+app.post("/api/categories", requireAuth, (req, res) => {
+  const { name } = req.body || {};
+  if (!name || typeof name !== "string") {
+    return res.status(400).json({ error: "Category name is required" });
+  }
+
+  // Basic dupe check (case-insensitive)
+  const existing = queue.getCategories(req.session.user.username);
+  if (existing.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+    return res.status(400).json({ error: "Category already exists" });
+  }
+
+  const category = queue.addCategory(name.trim(), req.session.user.username);
+  res.status(201).json({ category });
+});
+
 app.post("/api/jobs", requireAuth, async (req, res) => {
-  const { country, cities, states = [], niches, includeGoogleMaps = true } = req.body || {};
+  const { country, cities, states = [], niches, includeGoogleMaps = true, scrapeMode = 'emails', sites, category } = req.body || {};
 
   if (queue.hasUserActiveJob(req.session.user.username)) {
     return res.status(429).json({ error: "You already have a job running or in the queue. Please wait or stop the current job before starting a new one." });
@@ -228,7 +249,7 @@ app.post("/api/jobs", requireAuth, async (req, res) => {
 
   const jobData = {
     id: crypto.randomUUID(),
-    params: { country, cities, states, niches, includeGoogleMaps }
+    params: { country, cities, states, niches, includeGoogleMaps, scrapeMode, sites, category }
   };
 
   const job = queue.addJob(jobData, req.session.user.username);
@@ -297,7 +318,7 @@ app.post("/api/check-template", requireAuth, async (req, res) => {
   if (!html) return res.status(400).json({ error: "No HTML template provided" });
 
   const spamWords = ["free", "win", "winner", "prize", "cash", "act now", "limited time", "guarantee", "congratulations", "urgent", "money", "income", "profit", "earn", "dollar", "crypto", "bitcoin", "lottery", "gift card", "reward", "viagra", "pharmacy", "medicine", "drugs", "no cost", "best price", "save big", "buy now", "click here", "subscribe", "urgent", "secret", "unlimited", "apply now", "claims", "collect", "extra", "junk", "marketing", "promotion", "sales", "special", "stop", "unsubscribe"];
-  
+
   const findings = [];
   let spamScore = 0;
   let webhookStatus = null;
@@ -310,14 +331,14 @@ app.post("/api/check-template", requireAuth, async (req, res) => {
       const webhookResponse = await fetch("http://127.0.0.1:5678/webhook-test/get", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          email: testEmail, 
-          subject: subject || "Test Email", 
+        body: JSON.stringify({
+          email: testEmail,
+          subject: subject || "Test Email",
           html,
           requestId // Send this to n8n so it can call back
         })
       });
-      
+
       if (webhookResponse.ok) {
         try {
           const n8nData = await webhookResponse.json();
@@ -355,7 +376,7 @@ app.post("/api/check-template", requireAuth, async (req, res) => {
     const result = await validator({ data: html, format: "json" });
     const errors = result.messages.filter(m => {
       if (m.type !== "error") return false;
-      
+
       const msg = m.message.toLowerCase();
       // Ignore common email-specific false positives
       if (msg.includes("xmlns:v") || msg.includes("xmlns:o")) return false;
@@ -363,7 +384,7 @@ app.post("/api/check-template", requireAuth, async (req, res) => {
       if (msg.includes("doctype")) return false;
       if (msg.includes("meta") && msg.includes("attribute") && msg.includes("property") && msg.includes("not allowed")) return false;
       if (msg.includes("meta") && msg.includes("missing") && (msg.includes("content") || msg.includes("property"))) return false;
-      
+
       return true;
     });
 
