@@ -5,83 +5,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LeadHunter — Login</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Fira+Sans:wght@300;400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap"
     rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
-  <style>
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background: var(--bg-base);
-      /* OLED pure dark */
-    }
 
-    .login-wrap {
-      width: 100%;
-      max-width: 420px;
-      padding: 24px;
-    }
-
-    .login-logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      justify-content: center;
-      margin-bottom: 32px;
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--blue-primary);
-      letter-spacing: -0.5px;
-    }
-
-    .login-header {
-      text-align: center;
-      margin-bottom: 28px;
-    }
-
-    .login-title {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 6px;
-    }
-
-    .login-sub {
-      font-size: 14px;
-      color: var(--text-secondary);
-    }
-
-    .remember {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-top: 16px;
-      margin-bottom: 24px;
-    }
-
-    .remember input {
-      accent-color: var(--blue-primary);
-      cursor: pointer;
-      width: 16px;
-      height: 16px;
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-    }
-  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="tailwind-config.js"></script>
 </head>
 
-<body>
-  <div class="login-wrap">
-    <div class="login-logo">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round">
+<body
+  class="bg-brand-base flex items-center justify-center min-h-screen text-brand-text font-sans antialiased relative overflow-hidden">
+  <!-- Fancy Background Mesh Gradients -->
+  <div
+    class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-400/20 rounded-full blur-[120px] mix-blend-multiply">
+  </div>
+  <div
+    class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-400/20 rounded-full blur-[120px] mix-blend-multiply">
+  </div>
+
+  <div class="w-full max-w-[420px] p-6 relative z-10">
+    <div class="flex items-center gap-3 justify-center mb-10 text-3xl font-bold text-brand-text tracking-tight">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+        stroke-linecap="round" stroke-linejoin="round" class="text-brand-primary drop-shadow-sm">
         <circle cx="11" cy="11" r="8" />
         <path d="m21 21-4.35-4.35" />
         <path d="M11 8v6M8 11h6" />
@@ -89,33 +37,43 @@
       LeadHunter
     </div>
 
-    <div class="ui-card">
-      <div class="login-header">
-        <div class="login-title">Welcome back</div>
-        <div class="login-sub">Sign in to your data dashboard</div>
+    <!-- Glassmorphism Card Wrapper -->
+    <div
+      class="bg-white/90 backdrop-blur-2xl border border-white/40 rounded-2xl p-8 shadow-[0_8px_40px_rgba(31,38,135,0.08)]">
+      <div class="text-center mb-8">
+        <div class="text-2xl font-bold text-brand-text tracking-tight mb-2">Welcome back</div>
+        <div class="text-sm font-medium text-brand-secondary">Sign in to your intelligent workspace</div>
       </div>
 
       <form id="loginForm">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input type="text" id="username" name="username" class="ui-input" placeholder="admin" required
-            autocomplete="username" />
+        <div class="mb-5">
+          <label for="username"
+            class="block text-xs font-bold text-brand-secondary mb-2 tracking-wide uppercase">Username</label>
+          <input type="text" id="username" name="username"
+            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-brand-text font-mono focus:bg-white focus:outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition-all duration-300 shadow-inner"
+            placeholder="admin" required autocomplete="username" />
         </div>
 
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" class="ui-input" placeholder="••••••••" required
-            autocomplete="current-password" />
+        <div class="mb-5">
+          <label for="password"
+            class="block text-xs font-bold text-brand-secondary mb-2 tracking-wide uppercase">Password</label>
+          <input type="password" id="password" name="password"
+            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-brand-text font-mono focus:bg-white focus:outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition-all duration-300 shadow-inner"
+            placeholder="••••••••" required autocomplete="current-password" />
         </div>
 
-        <div class="remember">
-          <input type="checkbox" id="rememberMe" name="rememberMe" />
-          <label for="rememberMe" style="cursor: pointer;">Remember me for 30 days</label>
+        <div class="flex items-center gap-2 mt-2 mb-8">
+          <input type="checkbox" id="rememberMe" name="rememberMe"
+            class="w-4 h-4 rounded-md border-slate-300 bg-white text-brand-primary focus:ring-brand-primary/20 cursor-pointer accent-brand-primary" />
+          <label for="rememberMe"
+            class="text-sm font-medium text-brand-secondary cursor-pointer hover:text-brand-text transition-colors">Remember
+            me for 30 days</label>
         </div>
 
-        <button type="submit" class="ui-btn ui-btn-primary full-width">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+        <button type="submit"
+          class="w-full py-3.5 bg-brand-primary hover:bg-brand-primary/90 text-white rounded-xl text-sm font-bold tracking-wide transition-all duration-300 flex items-center justify-center shadow-[0_4px_14px_rgba(99,102,241,0.39)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.23)] hover:-translate-y-0.5 cursor-pointer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round" class="mr-2.5">
             <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
             <polyline points="10 17 15 12 10 7"></polyline>
             <line x1="15" y1="12" x2="3" y2="12"></line>
@@ -123,7 +81,9 @@
           Sign In
         </button>
       </form>
-      <div id="error" class="error-box" style="display:none; margin-top:20px;"></div>
+      <div id="error"
+        class="hidden mt-6 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm font-medium shadow-sm">
+      </div>
     </div>
   </div>
   <script>
@@ -134,7 +94,7 @@
       const rememberMe = e.target.rememberMe.checked;
       const errorDiv = document.getElementById("error");
 
-      errorDiv.style.display = 'none';
+      errorDiv.classList.add('hidden');
       errorDiv.textContent = '';
 
       try {
@@ -148,12 +108,12 @@
           window.location.href = "/dashboard.html";
         } else {
           const result = await response.json();
-          errorDiv.innerHTML = `<strong>Failed:</strong><br>${result.error || "Login failed. Check your credentials."}`;
-          errorDiv.style.display = 'block';
+          errorDiv.innerHTML = `<strong>Verification Failed</strong><br/>${result.error || "Incorrect credentials."}`;
+          errorDiv.classList.remove('hidden');
         }
       } catch (error) {
-        errorDiv.innerHTML = `<strong>Network Error:</strong><br>Something went wrong. Please try again.`;
-        errorDiv.style.display = 'block';
+        errorDiv.innerHTML = `<strong>Network Error</strong><br/>Secure connection lost.`;
+        errorDiv.classList.remove('hidden');
       }
     });
   </script>

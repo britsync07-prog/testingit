@@ -1,100 +1,74 @@
-<!doctype html>
-<html lang="en">
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LeadHunter — Scraper Dashboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Fira+Sans:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
-</head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&amp;family=Fira+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="tailwind-config.js"></script>
+  <link rel="stylesheet" href="styles.css?v=light">
 
-<body>
+
+
 
   <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8" />
-        <path d="m21 21-4.35-4.35" />
-        <path d="M11 8v6M8 11h6" />
+  
+  <!-- Sidebar -->
+  <aside class="w-[220px] border-r flex flex-col fixed inset-y-0 left-0 z-50 bg-white/80 backdrop-blur-xl border-slate-200 shadow-[0_8px_32px_rgba(31,38,135,0.07)]">
+    <div class="flex items-center gap-3 p-5 pb-4 border-b text-brand-primary font-bold text-lg tracking-tight border-slate-200">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.35-4.35"></path>
+        <path d="M11 8v6M8 11h6"></path>
       </svg>
       <span>LeadHunter</span>
     </div>
-    <nav class="sidebar-nav">
-      <a href="/dashboard.html" class="nav-item active">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="3" width="20" height="14" rx="2" />
-          <path d="M8 21h8M12 17v4" />
-        </svg>
+    <nav class="flex-1 p-3 flex flex-col gap-1.5 overflow-y-auto">
+      <a href="/dashboard.html" class="flex items-center gap-2.5 px-3 py-2 rounded-md font-medium transition-all bg-brand-primary/10 text-brand-primary border border-brand-primary/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] cursor-default">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"></rect><path d="M8 21h8M12 17v4"></path></svg>
         Scraper
       </a>
-      <a href="/sender.html" class="nav-item" id="navSender">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="m22 2-7 20-4-9-9-4Z" />
-          <path d="M22 2 11 13" />
-        </svg>
+      <a href="/sender.html" id="navSender" class="flex items-center gap-2.5 px-3 py-2 rounded-md font-medium transition-all text-brand-secondary hover:bg-brand-hover hover:text-brand-text border border-transparent">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"></path><path d="M22 2 11 13"></path></svg>
         Sender
       </a>
-      <a href="/categories.html" class="nav-item">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-        </svg>
+      <a href="/categories.html" class="flex items-center gap-2.5 px-3 py-2 rounded-md font-medium transition-all text-brand-secondary hover:bg-brand-hover hover:text-brand-text border border-transparent">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
         Categories
       </a>
-      <a href="/checker.html" class="nav-item" id="navChecker">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 12l2 2 4-4" />
-          <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3" />
-          <path d="M3 12c1 0 3-1 3-3S4 6 3 6 0 7 0 9s2 3 3 3" />
-          <path d="M12 3c0 1-1 3-3 3S6 4 6 3s1-3 3-3 3 2 3 3" />
-          <path d="M12 21c0-1-1-3-3-3s-3 1-3 3 1 3 3 3 3-2 3-3" />
-        </svg>
+      <a href="/checker.html" id="navChecker" class="flex items-center gap-2.5 px-3 py-2 rounded-md font-medium transition-all text-brand-secondary hover:bg-brand-hover hover:text-brand-text border border-transparent">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"></path><path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path><path d="M3 12c1 0 3-1 3-3S4 6 3 6 0 7 0 9s2 3 3 3"></path><path d="M12 3c0 1-1 3-3 3S6 4 6 3s1-3 3-3 3 2 3 3"></path><path d="M12 21c0-1-1-3-3-3s-3 1-3 3 1 3 3 3 3-2 3-3"></path></svg>
         Checker
       </a>
     </nav>
-    <div class="sidebar-footer">
-      <div class="user-badge">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="8" r="5" />
-          <path d="M20 21a8 8 0 1 0-16 0" />
-        </svg>
-        <span id="userInfo">Loading...</span>
+    <div class="p-3 border-t flex flex-col gap-2 bg-slate-50 border-slate-200">
+      <div class="flex items-center gap-2 px-3 py-2.5 bg-brand-base rounded-md border text-sm text-brand-secondary border-slate-200">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-primary shrink-0"><circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 1 0-16 0"></path></svg>
+        <span id="userInfo" class="truncate font-mono text-xs">Loading...</span>
       </div>
-      <button id="logoutBtn" class="logout-btn" title="Logout">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-          <polyline points="16 17 21 12 16 7" />
-          <line x1="21" y1="12" x2="9" y2="12" />
-        </svg>
+      <button id="logoutBtn" class="flex items-center justify-center gap-2 px-3 py-2 w-full text-sm font-medium text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all cursor-pointer border border-transparent hover:border-red-500/20">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
         Logout
       </button>
     </div>
   </aside>
 
+
   <!-- Main Content -->
-  <div class="main-wrapper">
+  <div class="ml-[220px] flex-1 flex flex-col min-h-screen">
 
     <!-- Top Bar -->
-    <header class="topbar">
-      <div class="topbar-left">
-        <h1 class="page-title">Scraper Dashboard</h1>
+    <header class="h-[64px] backdrop-blur-md border-b flex items-center justify-between px-6 sticky top-0 z-40 bg-white/70 backdrop-blur-xl border-slate-200 shadow-sm">
+      <div class="flex items-center gap-4">
+        <h1 class="text-xl font-semibold text-brand-text tracking-tight">Scraper Dashboard</h1>
         <div id="queueStatus" class="queue-badge"></div>
       </div>
-      <div class="topbar-right">
-        <span id="usageQuotaEl"
-          style="display:none; font-size:12px; font-weight:600; padding:4px 8px; border-radius:4px; background:rgba(59,130,246,0.1); color:var(--blue-primary); margin-right:12px; white-space:nowrap;"></span>
+      <div class="flex items-center gap-3">
+        <span id="usageQuotaEl" style="display:none; font-size:12px; font-weight:600; padding:4px 8px; border-radius:4px; background:rgba(59,130,246,0.1); color:var(--blue-primary); margin-right:12px; white-space:nowrap;"></span>
         <div class="status-indicator" id="statusIndicator">
           <span class="dot dot--idle"></span>
           <span id="status">Idle</span>
@@ -103,28 +77,28 @@
     </header>
 
     <!-- Content Grid -->
-    <div class="content-grid">
+    <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 w-full max-w-7xl mx-auto overflow-y-auto">
 
       <!-- LEFT COLUMN: Config -->
-      <div class="col-config">
+      <div class="border rounded-xl overflow-hidden h-fit flex flex-col gap-4 p-5">
 
         <!-- Niches Card -->
-        <div class="ui-card compact">
-          <div class="card-header">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 20h9" />
-              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+        <div class="border rounded-xl overflow-hidden h-fit flex flex-col gap-4 p-5">
+          <div class="pb-3 border-b flex items-center gap-2.5 text-brand-text font-semibold border-slate-200">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-primary">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
             </svg>
-            <h2>Niches</h2>
+            <h2 class="font-semibold text-brand-text m-0 text-base">Niches</h2>
           </div>
-          <label for="niches" class="field-label">Enter one niche per line</label>
-          <textarea id="niches" rows="5" placeholder="Fitness Trainer&#10;Yoga Instructor&#10;Gym Coach"></textarea>
-          <button id="expandNiches" class="btn btn--ghost btn--sm">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 8v8M8 12h8" />
+          <label for="niches" class="block text-xs font-semibold text-brand-muted mb-1.5 uppercase tracking-wide">Enter one niche per line</label>
+          <textarea id="niches" rows="5" placeholder="Fitness Trainer
+Yoga Instructor
+Gym Coach" class="w-full px-3 py-2.5 border rounded-md text-sm text-brand-text font-mono focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/50 transition-all placeholder:text-brand-border border-slate-200 bg-white shadow-sm"></textarea>
+          <button id="expandNiches" class="text-xs px-2 py-1 text-brand-primary hover:bg-brand-primary/10 rounded border border-transparent transition-colors cursor-pointer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 8v8M8 12h8"></path>
             </svg>
             Expand niche ideas
           </button>
@@ -132,36 +106,33 @@
         </div>
 
         <!-- Location Card -->
-        <div class="ui-card compact">
-          <div class="card-header">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-              <circle cx="12" cy="10" r="3" />
+        <div class="border rounded-xl overflow-hidden h-fit flex flex-col gap-4 p-5">
+          <div class="pb-3 border-b flex items-center gap-2.5 text-brand-text font-semibold border-slate-200">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-primary">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
             </svg>
-            <h2>Details & Location</h2>
+            <h2 class="font-semibold text-brand-text m-0 text-base">Details &amp; Location</h2>
           </div>
 
           <div style="margin-bottom: 20px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
-              <label for="jobCategory" class="field-label" style="margin:0;">Category <span class="badge-optional"
-                  style="font-weight:normal;">optional</span></label>
-              <button id="addCategoryBtn" class="btn btn--ghost btn--sm" style="padding: 2px 6px; font-size: 11px;">+
+              <label for="jobCategory" class="block text-xs font-semibold text-brand-muted mb-1.5 uppercase tracking-wide" style="margin:0;">Category <span class="badge-optional" style="font-weight:normal;">optional</span></label>
+              <button id="addCategoryBtn" class="text-xs px-2 py-1 text-brand-primary hover:bg-brand-primary/10 rounded border border-transparent transition-colors cursor-pointer">+
                 New Category</button>
             </div>
-            <select id="jobCategory"
-              style="width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 14px; outline: none; transition: border-color var(--transition-speed), box-shadow var(--transition-speed); background: var(--bg-input); color: var(--text-primary); cursor: pointer;">
+            <select id="jobCategory" class="w-full px-3 py-2.5 border rounded-md text-sm text-brand-text font-mono focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/50 transition-all placeholder:text-brand-border border-slate-200 bg-white shadow-sm">
               <option value="">-- Select a Category --</option>
             </select>
           </div>
 
-          <label for="country" class="field-label">Country</label>
-          <select id="country"></select>
+          <label for="country" class="block text-xs font-semibold text-brand-muted mb-1.5 uppercase tracking-wide">Country</label>
+          <select id="country" class="w-full px-3 py-2.5 border rounded-md text-sm text-brand-text font-mono focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/50 transition-all placeholder:text-brand-border border-slate-200 bg-white shadow-sm"></select>
 
           <div class="location-section">
             <div class="section-header-row">
               <span class="section-label">States / Regions <span class="badge-optional">optional</span></span>
-              <label class="check-all-label">
+              <label class="check-all-label block text-xs font-semibold text-brand-muted mb-1.5 uppercase tracking-wide">
                 <input type="checkbox" id="selectAllStates"> All
               </label>
             </div>
@@ -171,7 +142,7 @@
           <div class="location-section">
             <div class="section-header-row">
               <span class="section-label">Cities</span>
-              <label class="check-all-label">
+              <label class="check-all-label block text-xs font-semibold text-brand-muted mb-1.5 uppercase tracking-wide">
                 <input type="checkbox" id="selectAllCities"> All
               </label>
             </div>
@@ -180,51 +151,46 @@
         </div>
 
         <!-- Options Card -->
-        <div class="ui-card compact">
-          <div class="card-header">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" />
+        <div class="border rounded-xl overflow-hidden h-fit flex flex-col gap-4 p-5">
+          <div class="pb-3 border-b flex items-center gap-2.5 text-brand-text font-semibold border-slate-200">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-primary">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"></path>
             </svg>
-            <h2>Scrape Mode</h2>
+            <h2 class="font-semibold text-brand-text m-0 text-base">Scrape Mode</h2>
           </div>
 
           <div class="mode-grid">
-            <label class="mode-card mode-card--active" for="modeEmails">
-              <input type="radio" id="modeEmails" name="scrapeMode" value="emails" checked />
+            <label class="mode-card mode-card--active block text-xs font-semibold text-brand-muted mb-1.5 uppercase tracking-wide" for="modeEmails">
+              <input type="radio" id="modeEmails" name="scrapeMode" value="emails" checked="">
               <div class="mode-icon mode-icon--email">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <rect width="20" height="16" x="2" y="4" rx="2" />
-                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
                 </svg>
               </div>
               <div class="mode-label">Emails Only</div>
               <div class="mode-desc">Scrape email addresses</div>
             </label>
 
-            <label class="mode-card" for="modePhones">
-              <input type="radio" id="modePhones" name="scrapeMode" value="phones" />
+            <label class="mode-card block text-xs font-semibold text-brand-muted mb-1.5 uppercase tracking-wide" for="modePhones">
+              <input type="radio" id="modePhones" name="scrapeMode" value="phones">
               <div class="mode-icon mode-icon--phone">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <path
-                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.39 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.86-1.84a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.39 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.86-1.84a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path>
                 </svg>
               </div>
               <div class="mode-label">Phone / WhatsApp</div>
               <div class="mode-desc">Find numbers by country code</div>
             </label>
 
-            <label class="mode-card" for="modeBoth">
-              <input type="radio" id="modeBoth" name="scrapeMode" value="both" />
+            <label class="mode-card block text-xs font-semibold text-brand-muted mb-1.5 uppercase tracking-wide" for="modeBoth">
+              <input type="radio" id="modeBoth" name="scrapeMode" value="both">
               <div class="mode-icon mode-icon--both">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <rect width="20" height="16" x="2" y="4" rx="2" />
-                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07" class="hidden-partial" />
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07" class="hidden-partial"></path>
                 </svg>
               </div>
               <div class="mode-label">Both</div>
@@ -235,10 +201,9 @@
           <!-- Live query preview shown when phone mode selected -->
           <div id="phoneQueryPreview" class="phone-query-preview" style="display:none">
             <div class="pqp-label">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
               </svg>
               Phone query example:
             </div>
@@ -247,16 +212,15 @@
 
           <!-- Maps toggle -->
           <div id="mapsToggleWrap" style="margin-top:14px;">
-            <label for="googleMapsMode" class="field-label">Google Maps Search</label>
-            <select id="googleMapsMode">
+            <label for="googleMapsMode" class="block text-xs font-semibold text-brand-muted mb-1.5 uppercase tracking-wide">Google Maps Search</label>
+            <select id="googleMapsMode" class="w-full px-3 py-2.5 border rounded-md text-sm text-brand-text font-mono focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/50 transition-all placeholder:text-brand-border border-slate-200 bg-white shadow-sm">
               <option value="yes">Yes, include Google Maps</option>
               <option value="no">No, skip Google Maps</option>
             </select>
             <p id="mapsModeHint" class="hint-text">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 16v-4M12 8h.01" />
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 16v-4M12 8h.01"></path>
               </svg>
               Choose <strong>No</strong> to speed up scraping and skip Maps requests.
             </p>
@@ -264,64 +228,44 @@
 
           <!-- Social Media Priority -->
           <div class="sm-priority-wrap" style="margin-top:16px;">
-            <label class="field-label" style="display:flex; justify-content:space-between; align-items:center;">
+            <label class="block text-xs font-semibold text-brand-muted mb-1.5 uppercase tracking-wide" style="display:flex; justify-content:space-between; align-items:center;">
               Social Media Priority
               <span class="hint-text" style="margin:0; font-size:9px;">Waitlist skipped if selected</span>
             </label>
-            <div class="checkbox-group" id="smGroup"
-              style="display:flex; flex-direction:column; gap:8px; background:var(--bg-input); padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-sm);">
-              <label
-                style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; color:var(--text-primary);">
-                <input type="checkbox" id="smLeaveIt" checked
-                  style="accent-color:var(--blue-primary); width:14px; height:14px;">
+            <div class="checkbox-group" id="smGroup" style="display:flex; flex-direction:column; gap:8px; background:var(--bg-input); padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-sm);">
+              <label style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; color:var(--text-primary);">
+                <input type="checkbox" id="smLeaveIt" checked="" style="accent-color:var(--blue-primary); width:14px; height:14px;">
                 <strong>Leave it to us</strong> <span style="color:var(--text-muted); font-size:10px;">(Default
                   rotation)</span>
               </label>
               <div style="height:1px; background:var(--border); margin:2px 0;"></div>
-              <label
-                style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; color:var(--text-primary); opacity:0.5;"
-                class="sm-option">
-                <input type="checkbox" value="facebook.com" class="sm-site" disabled
-                  style="accent-color:var(--blue-primary); width:14px; height:14px;"> Facebook
+              <label style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; color:var(--text-primary); opacity:0.5;" class="sm-option">
+                <input type="checkbox" value="facebook.com" class="sm-site" disabled="" style="accent-color:var(--blue-primary); width:14px; height:14px;"> Facebook
               </label>
-              <label
-                style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; color:var(--text-primary); opacity:0.5;"
-                class="sm-option">
-                <input type="checkbox" value="instagram.com" class="sm-site" disabled
-                  style="accent-color:var(--blue-primary); width:14px; height:14px;"> Instagram
+              <label style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; color:var(--text-primary); opacity:0.5;" class="sm-option">
+                <input type="checkbox" value="instagram.com" class="sm-site" disabled="" style="accent-color:var(--blue-primary); width:14px; height:14px;"> Instagram
               </label>
-              <label
-                style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; color:var(--text-primary); opacity:0.5;"
-                class="sm-option">
-                <input type="checkbox" value="linkedin.com/in" class="sm-site" disabled
-                  style="accent-color:var(--blue-primary); width:14px; height:14px;"> LinkedIn
+              <label style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; color:var(--text-primary); opacity:0.5;" class="sm-option">
+                <input type="checkbox" value="linkedin.com/in" class="sm-site" disabled="" style="accent-color:var(--blue-primary); width:14px; height:14px;"> LinkedIn
               </label>
-              <label
-                style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; color:var(--text-primary); opacity:0.5;"
-                class="sm-option">
-                <input type="checkbox" value="twitter.com" class="sm-site" disabled
-                  style="accent-color:var(--blue-primary); width:14px; height:14px;"> Twitter
+              <label style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; color:var(--text-primary); opacity:0.5;" class="sm-option">
+                <input type="checkbox" value="twitter.com" class="sm-site" disabled="" style="accent-color:var(--blue-primary); width:14px; height:14px;"> Twitter
               </label>
-              <label
-                style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; color:var(--text-primary); opacity:0.5;"
-                class="sm-option">
-                <input type="checkbox" value="reddit.com" class="sm-site" disabled
-                  style="accent-color:var(--blue-primary); width:14px; height:14px;"> Reddit
+              <label style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; color:var(--text-primary); opacity:0.5;" class="sm-option">
+                <input type="checkbox" value="reddit.com" class="sm-site" disabled="" style="accent-color:var(--blue-primary); width:14px; height:14px;"> Reddit
               </label>
             </div>
           </div>
         </div>
 
         <!-- Error Box -->
-        <div id="runErrorBox"
-          style="display:none; background-color:#fee2e2; border:1px solid #f87171; color:#991b1b; padding:12px; border-radius:6px; margin-bottom:12px; font-size:13px; line-height:1.4;">
+        <div id="runErrorBox" style="display:none; background-color:#fee2e2; border:1px solid #f87171; color:#991b1b; padding:12px; border-radius:6px; margin-bottom:12px; font-size:13px; line-height:1.4;">
         </div>
 
         <!-- Run Button -->
-        <button id="run" class="btn btn--primary btn--full">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="6 3 20 12 6 21 6 3" />
+        <button id="run" class="mt-2 w-full py-2.5 bg-brand-primary hover:bg-blue-600 text-white rounded-md text-sm font-semibold transition-all duration-200 flex items-center justify-center shadow-glow cursor-pointer gap-2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="6 3 20 12 6 21 6 3"></polygon>
           </svg>
           Run Scraper
         </button>
@@ -329,23 +273,21 @@
       </div>
 
       <!-- RIGHT COLUMN: Live Feed + History -->
-      <div class="col-results">
+      <div class="border rounded-xl overflow-hidden h-fit flex flex-col gap-4 p-5">
 
         <!-- Live Events Card -->
-        <div class="ui-card compact card--live">
-          <div class="card-header">
+        <div class="border rounded-xl overflow-hidden h-fit flex flex-col gap-4 p-5">
+          <div class="pb-3 border-b flex items-center gap-2.5 text-brand-text font-semibold border-slate-200">
             <div class="card-header-left">
               <span class="live-dot"></span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-primary">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
               </svg>
-              <h2>Live Activity</h2>
+              <h2 class="font-semibold text-brand-text m-0 text-base">Live Activity</h2>
             </div>
             <div style="display:flex;gap:8px;align-items:center">
               <div class="live-count" id="liveLeadCount">0 leads</div>
-              <div class="live-count" id="livePhoneCount"
-                style="background:var(--purple);background:rgba(139,92,246,0.15);border-color:var(--purple);color:var(--purple);">
+              <div class="live-count" id="livePhoneCount" style="background:var(--purple);background:rgba(139,92,246,0.15);border-color:var(--purple);color:var(--purple);">
                 0 phones</div>
             </div>
           </div>
@@ -354,12 +296,9 @@
             <ul id="files"></ul>
           </div>
           <div id="currentPhones" class="files-strip" style="margin-top:8px">
-            <div
-              style="font-size:11px;font-weight:600;color:var(--purple);letter-spacing:0.05em;margin-bottom:6px;text-transform:uppercase;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle">
-                <path
-                  d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.39 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.86-1.84a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+            <div style="font-size:11px;font-weight:600;color:var(--purple);letter-spacing:0.05em;margin-bottom:6px;text-transform:uppercase;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.39 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.86-1.84a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
               </svg>
               Phone / WhatsApp Numbers
             </div>
@@ -368,19 +307,17 @@
         </div>
 
         <!-- History Card -->
-        <div class="ui-card compact">
-          <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="border rounded-xl overflow-hidden h-fit flex flex-col gap-4 p-5">
+          <div class="pb-3 border-b flex items-center gap-2.5 text-brand-text font-semibold border-slate-200" style="display:flex; justify-content:space-between; align-items:center;">
             <div style="display:flex; align-items:center; gap:8px;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                <path d="M3 3v5h5" />
-                <path d="M12 7v5l4 2" />
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-primary">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                <path d="M3 3v5h5"></path>
+                <path d="M12 7v5l4 2"></path>
               </svg>
-              <h2 style="margin:0;">Job History</h2>
+              <h2 style="margin:0;" class="font-semibold text-brand-text m-0 text-base">Job History</h2>
             </div>
-            <select id="historyCategoryFilter"
-              style="font-size: 12px; padding: 4px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-input); color: var(--text-primary); outline: none; cursor: pointer; max-width: 140px;">
+            <select id="historyCategoryFilter" class="w-full px-3 py-2.5 border rounded-md text-sm text-brand-text font-mono focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/50 transition-all placeholder:text-brand-border border-slate-200 bg-white shadow-sm">
               <option value="all">All Categories</option>
             </select>
           </div>
@@ -397,11 +334,10 @@
     <div class="modal-container">
       <div class="modal-header">
         <h3 id="modalFileName">Loading...</h3>
-        <button id="closeModalBtn" class="modal-close-btn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 6 6 18" />
-            <path d="m6 6 12 12" />
+        <button id="closeModalBtn" class="modal-close-btn mt-2 w-full py-2.5 bg-brand-primary hover:bg-blue-600 text-white rounded-md text-sm font-semibold transition-all duration-200 flex items-center justify-center shadow-glow cursor-pointer gap-2">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
           </svg>
         </button>
       </div>
@@ -409,12 +345,11 @@
         <!-- Text or Table content injected here -->
       </div>
       <div class="modal-footer">
-        <a id="modalDownloadBtn" href="#" class="btn btn--primary btn--sm" style="text-decoration:none;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
+        <a id="modalDownloadBtn" href="#" class="mt-2 w-full py-2.5 bg-brand-primary hover:bg-blue-600 text-white rounded-md text-sm font-semibold transition-all duration-200 flex items-center justify-center shadow-glow cursor-pointer gap-2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
           Download File
         </a>
@@ -423,6 +358,5 @@
   </div>
 
   <script type="module" src="app.js"></script>
-</body>
 
-</html>
+

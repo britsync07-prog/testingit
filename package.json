@@ -5,9 +5,11 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
+    "start:prod": "pm2-runtime start ecosystem.config.cjs",
     "check": "node --check src/server.js && node --check src/scraper.js",
     "setup:python": "bash ./scripts/install_python_deps.sh",
-    "postinstall": "npm run setup:python"
+    "postinstall": "npm run setup:python",
+    "add-user": "node scripts/add_user.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.6.1",
@@ -17,6 +19,7 @@
     "cheerio": "^1.2.0",
     "commander": "^13.1.0",
     "cookie-parser": "^1.4.7",
+    "dotenv": "^17.3.1",
     "express": "^4.22.1",
     "express-rate-limit": "^8.2.1",
     "express-session": "^1.19.0",
