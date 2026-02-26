@@ -1,49 +1,286 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Email Sender - Lead Scraper</title>
+  <title>LeadHunter — Sender Campaigns</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Fira+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
-  <header class="container header-nav">
-    <nav>
-      <a href="/" class="nav-link">Scraper</a>
-      <a href="/sender.html" class="nav-link active">Sender</a>
-      <a href="/checker.html" class="nav-link">Checker</a>
+
+  <!-- Sidebar (Cloned exactly from dashboard.html for seamless navigation) -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.35-4.35" />
+        <path d="M11 8v6M8 11h6" />
+      </svg>
+      <span>LeadHunter</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/dashboard.html" class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2" />
+          <path d="M8 21h8M12 17v4" />
+        </svg>
+        Scraper
+      </a>
+      <a href="/sender.html" class="nav-item active" id="navSender">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="m22 2-7 20-4-9-9-4Z" />
+          <path d="M22 2 11 13" />
+        </svg>
+        Sender
+      </a>
+      <a href="/categories.html" class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+        </svg>
+        Categories
+      </a>
+      <a href="/checker.html" class="nav-item" id="navChecker">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 12l2 2 4-4" />
+          <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3" />
+          <path d="M3 12c1 0 3-1 3-3S4 6 3 6 0 7 0 9s2 3 3 3" />
+          <path d="M12 3c0 1-1 3-3 3S6 4 6 3s1-3 3-3 3 2 3 3" />
+          <path d="M12 21c0-1-1-3-3-3s-3 1-3 3 1 3 3 3 3-2 3-3" />
+        </svg>
+        Checker
+      </a>
     </nav>
-    <div id="userInfo"></div>
-    <button id="logoutBtn">Logout</button>
-  </header>
-  <main class="container">
-    <h1>Email Sender</h1>
-
-    <section class="panel">
-      <h3>1. Upload Email List</h3>
-      <p>Upload a .txt file containing one email per line.</p>
-      <input type="file" id="emailFile" accept=".txt" />
-      <div id="fileStats" class="stats-box" style="display: none;">
-        <strong>Emails found:</strong> <span id="emailCount">0</span>
+    <div class="sidebar-footer">
+      <div class="user-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="5" />
+          <path d="M20 21a8 8 0 1 0-16 0" />
+        </svg>
+        <span id="userInfo">Loading...</span>
       </div>
-    </section>
+      <button id="logoutBtn" class="logout-btn" title="Logout">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+        Logout
+      </button>
+    </div>
+  </aside>
 
-    <section class="panel">
-      <h3>2. Compose Email</h3>
-      <label for="subject">Subject</label>
-      <input type="text" id="subject" placeholder="Enter email subject" style="width: 100%; padding: 8px; margin-bottom: 16px; border: 1px solid #dbe3ef; border-radius: 4px;">
-      
-      <label for="htmlTemplate">HTML Template</label>
-      <textarea id="htmlTemplate" rows="12" placeholder="<h1>Hello!</h1><p>Your message here...</p>"></textarea>
-      
-      <p style="font-size: 0.85em; color: #666;">Tip: You can use HTML tags to style your email.</p>
-    </section>
+  <!-- Main Content Area -->
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title">Campaign Sender</h1>
+        <div id="campaignStatusBadge" class="queue-badge" style="display:none;"></div>
+      </div>
+    </header>
 
-    <section class="panel">
-      <button id="sendEmails" class="send-btn" disabled>Send Emails</button>
-      <div id="sendStatus"></div>
-    </section>
-  </main>
+    <div class="dashboard-content">
+
+      <!-- Top KPI Row (Data-Dense Design) -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon blue-glow">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M22 2L11 13"></path>
+              <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+            </svg>
+          </div>
+          <div class="metric-info">
+            <h4>Total Sent</h4>
+            <span class="metric-val" id="kpiTotalSent">0</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon green-glow">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <path d="M22 4L12 14.01L9 11.01"></path>
+            </svg>
+          </div>
+          <div class="metric-info">
+            <h4>Delivery Rate</h4>
+            <span class="metric-val" id="kpiDeliveryRate">0%</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon amber-glow">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </div>
+          <div class="metric-info">
+            <h4>Open Rate</h4>
+            <span class="metric-val" id="kpiOpenRate">0%</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon purple-glow">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M15 3h6v6"></path>
+              <path d="M9 21V9"></path>
+              <path d="M9 11h12"></path>
+            </svg>
+          </div>
+          <div class="metric-info">
+            <h4>Click Rate</h4>
+            <span class="metric-val" id="kpiClickRate">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Campaign Builder Split View -->
+      <div class="campaign-builder-split">
+        <!-- LEFT: Configuration -->
+        <div class="ui-card builder-config">
+          <div class="card-header">
+            <h2 class="card-title">Compose Campaign</h2>
+          </div>
+
+          <div class="form-group">
+            <label>Campaign Name <span class="required">*</span></label>
+            <input type="text" id="campaignName" class="ui-input" placeholder="e.g. Q4 Real Estate Outreach" />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group half">
+              <label>Sender Name <span class="required">*</span></label>
+              <input type="text" id="senderName" class="ui-input" placeholder="John Doe" />
+            </div>
+            <div class="form-group half">
+              <label>Subject Line <span class="required">*</span></label>
+              <input type="text" id="subjectLine" class="ui-input" placeholder="Exclusive Off-Market Deals Inside" />
+            </div>
+          </div>
+
+          <div
+            style="background: var(--bg-surface); padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 16px;">
+            <h4
+              style="margin-bottom: 12px; font-size: 14px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+              SMTP Configuration <span class="required">*</span>
+            </h4>
+
+            <div class="form-row" style="margin-bottom: 12px;">
+              <div class="form-group half" style="margin-bottom: 0;">
+                <label>SMTP Host</label>
+                <input type="text" id="smtpHost" class="ui-input" placeholder="smtp.gmail.com" />
+              </div>
+              <div class="form-group half" style="margin-bottom: 0; max-width: 100px;">
+                <label>Port</label>
+                <input type="number" id="smtpPort" class="ui-input" placeholder="587" value="587" />
+              </div>
+            </div>
+
+            <div class="form-row" style="margin-bottom: 0;">
+              <div class="form-group half" style="margin-bottom: 0;">
+                <label>Username (Email)</label>
+                <input type="text" id="smtpUser" class="ui-input" placeholder="you@example.com" />
+              </div>
+              <div class="form-group half" style="margin-bottom: 0;">
+                <label>App Password</label>
+                <input type="password" id="smtpPass" class="ui-input" placeholder="••••••••" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>HTML Email Body <span class="required">*</span></label>
+            <textarea id="htmlTemplate" class="ui-textarea" rows="12"
+              placeholder="<h1>Hi {{firstName}},</h1><p>We saw your property at {{address}}...</p>"></textarea>
+            <p class="input-hint">Variables supported. Links will be automatically encoded for tracking.</p>
+          </div>
+
+          <div id="senderErrorBox" class="error-box" style="display: none;"></div>
+
+          <button id="btnLaunchCampaign" class="ui-btn ui-btn-primary full-width mt-4" disabled>
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M22 2L11 13"></path>
+              <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+            </svg>
+            Launch Campaign
+          </button>
+        </div>
+
+        <!-- RIGHT: Audience & Targets -->
+        <div class="ui-card builder-audience">
+          <div class="card-header">
+            <h2 class="card-title">Target Audience</h2>
+          </div>
+
+          <div class="upload-zone" id="csvDropZone">
+            <svg width="32" height="32" fill="none" stroke="var(--blue-primary)" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <h4>Upload Recipients List</h4>
+            <p>Drag & drop your <code>.csv</code> or <code>.txt</code> lead file here</p>
+            <input type="file" id="audienceFile" accept=".csv,.txt" style="display: none;" />
+            <button class="ui-btn ui-btn-secondary btn-sm" id="btnBrowseFile">Browse Files</button>
+          </div>
+
+          <div id="audiencePreview" class="audience-preview" style="display:none;">
+            <div class="audience-stats">
+              <div class="audience-stat-bubble">
+                <span class="stat-num" id="parsedCount">0</span>
+                <span class="stat-label">Valid Emails</span>
+              </div>
+              <button class="ui-btn ui-btn-danger btn-icon" id="btnClearAudience" title="Remove Audience">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                  </path>
+                </svg>
+              </button>
+            </div>
+
+            <div class="audience-list-wrapper">
+              <table class="data-table dense-table">
+                <thead>
+                  <tr>
+                    <th>Email</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="audienceTableBody">
+                  <!-- JS Injection -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script type="module" src="app.js"></script>
   <script type="module" src="sender.js"></script>
 </body>
+
 </html>

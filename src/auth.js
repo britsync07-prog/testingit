@@ -34,7 +34,10 @@ export async function authenticate(username, password) {
   const users = await loadUsers();
   const user = users.find((u) => u.username === username);
   if (user && (await bcrypt.compare(password, user.password))) {
-    return { username: user.username };
+    return {
+      username: user.username,
+      subscriptionPlan: user.subscriptionPlan || "basic"
+    };
   }
   return null;
 }

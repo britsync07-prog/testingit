@@ -12,6 +12,10 @@ const logoutBtn = document.getElementById("logoutBtn");
 async function checkAuth() {
   try {
     const user = await fetchJson("/api/me");
+    if (user.subscriptionPlan !== 'premium') {
+      window.location.href = "/dashboard.html";
+      return;
+    }
     userInfoEl.textContent = `Logged in as: ${user.username}`;
   } catch (error) {
     window.location.href = "/login.html";
@@ -34,7 +38,7 @@ async function fetchJson(url, options) {
     try {
       const data = await response.json();
       if (data?.error) message = data.error;
-    } catch {}
+    } catch { }
     throw new Error(message);
   }
   return response.json();
@@ -64,17 +68,17 @@ checkTemplateBtn.addEventListener("click", async () => {
     resultPanel.style.display = "block";
     checkResult.textContent = response.status;
     checkResult.className = `result-badge ${response.status.toLowerCase()}`;
-    
+
     spamScore.textContent = `Spam Risk Score: ${response.spamScore}`;
     spamScore.className = `spam-score-box ${response.passed ? 'low' : 'high'}`;
 
     findingsList.innerHTML = "";
     if (response.webhookStatus) {
       const li = document.createElement("li");
-      const isError = response.webhookStatus.toLowerCase().includes("error") || 
-                      response.webhookStatus.toLowerCase().includes("failed") ||
-                      response.webhookStatus.toLowerCase().includes("cannot");
-      
+      const isError = response.webhookStatus.toLowerCase().includes("error") ||
+        response.webhookStatus.toLowerCase().includes("failed") ||
+        response.webhookStatus.toLowerCase().includes("cannot");
+
       li.innerHTML = `<strong>Delivery Status:</strong> <span style="color: ${isError ? '#dc2626' : '#059669'}">${response.webhookStatus}</span>`;
       findingsList.appendChild(li);
     }
@@ -110,7 +114,7 @@ async function pollCallback(requestId) {
   console.log(`Starting poll for requestId: ${requestId}`);
   const maxAttempts = 30; // 60 seconds total
   let attempts = 0;
-  
+
   const interval = setInterval(async () => {
     attempts++;
     if (attempts > maxAttempts) {
@@ -118,7 +122,7 @@ async function pollCallback(requestId) {
       clearInterval(interval);
       const waitingEl = document.getElementById("n8n-waiting");
       if (waitingEl) {
-          waitingEl.innerHTML = `<em>n8n callback timed out (no response received).</em>`;
+        waitingEl.innerHTML = `<em>n8n callback timed out (no response received).</em>`;
       }
       return;
     }
@@ -129,11 +133,11 @@ async function pollCallback(requestId) {
         const data = await response.json();
         console.log("Received callback data:", data);
         clearInterval(interval);
-        
+
         // Remove the waiting indicator
         const waitingEl = document.getElementById("n8n-waiting");
         if (waitingEl) waitingEl.remove();
-        
+
         // Add callback result to top of findings
         const li = document.createElement("li");
         li.style.background = "#eff6ff";
@@ -142,13 +146,13 @@ async function pollCallback(requestId) {
         li.style.borderRadius = "4px";
         li.style.margin = "10px 0";
 
-        const isError = data.message?.toLowerCase().includes("cannot") || 
-                        data.message?.toLowerCase().includes("error") ||
-                        data.message?.toLowerCase().includes("failed");
-                        
+        const isError = data.message?.toLowerCase().includes("cannot") ||
+          data.message?.toLowerCase().includes("error") ||
+          data.message?.toLowerCase().includes("failed");
+
         li.innerHTML = `<strong style="display: block; margin-bottom: 5px;">n8n Final Status:</strong> <span style="font-size: 1.1em; font-weight: bold; color: ${isError ? '#dc2626' : '#2563eb'}">${data.message}</span>`;
         if (data.details) {
-            li.innerHTML += `<br><small style="color: #4b5563;">${data.details}</small>`;
+          li.innerHTML += `<br><small style="color: #4b5563;">${data.details}</small>`;
         }
         findingsList.insertBefore(li, findingsList.firstChild);
       }

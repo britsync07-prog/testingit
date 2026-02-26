@@ -99,13 +99,15 @@ export class JobQueue {
         niches: job.params.niches,
         includeGoogleMaps: job.params.includeGoogleMaps !== false,
         scrapeMode: job.params.scrapeMode || 'emails',
-        sites: job.params.sites
+        sites: job.params.sites,
+        userPlan: job.params.userPlan
       });
 
       if (job.status !== "stopped") {
         job.status = "completed";
-        job.files = result.files;
-        this.pushEvent(job, { type: "job-completed", files: result.files });
+        // Safely merge files so we don't overwrite dynamically tracked files like CSVs
+        job.files = Array.from(new Set([...(job.files || []), ...(result.files || [])]));
+        this.pushEvent(job, { type: "job-completed", files: job.files });
       }
     } catch (error) {
       if (job.status !== "stopped") {
@@ -151,6 +153,44 @@ export class JobQueue {
     const payload = { ...event, time: new Date().toISOString() };
     job.events.push(payload);
 
+    // Track usage natively per job (emails only)
+    if (payload.type === 'lead-saved' || payload.type === 'phone-saved' || payload.type === 'csv-saved') {
+      if (payload.type === 'lead-saved' && payload.emailFileName) {
+        // Only count actual emails towards quota
+        job.leadsFound = (job.leadsFound || 0) + 1;
+      }
+
+      const usage = this.getUserUsage(job.userId);
+      const plan = job.params.userPlan || 'basic';
+      const dailyLimit = plan === 'basic' ? 300 : 100;
+      const monthlyLimit = plan === 'basic' ? 9000 : 3000;
+
+      // Send usage update to listeners
+      const usagePayload = {
+        type: 'usage-update',
+        usage: usage,
+        plan: plan,
+        dailyLimit,
+        monthlyLimit,
+        time: new Date().toISOString()
+      };
+      job.events.push(usagePayload);
+      for (const res of job.listeners) {
+        res.write(`data: ${JSON.stringify(usagePayload)}\n\n`);
+      }
+
+      if (usage.dailyCount >= dailyLimit || usage.monthlyCount >= monthlyLimit) {
+        if (job.processInstance && !job.processInstance.isStopped) {
+          job.processInstance.isStopped = true;
+          const infoPayload = { type: "info", message: `Plan limit reached (Daily: ${dailyLimit}, Monthly: ${monthlyLimit}). Stopping.`, time: new Date().toISOString() };
+          job.events.push(infoPayload);
+          for (const res of job.listeners) {
+            res.write(`data: ${JSON.stringify(infoPayload)}\n\n`);
+          }
+        }
+      }
+    }
+
     // Track files in the job object immediately when they are mentioned in events
     if (payload.fileName && !job.files.includes(payload.fileName)) {
       job.files.push(payload.fileName);
@@ -171,6 +211,26 @@ export class JobQueue {
     for (const res of job.listeners) {
       res.write(`data: ${JSON.stringify(payload)}\n\n`);
     }
+  }
+
+  getUserUsage(userId) {
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+    const monthStr = todayStr.substring(0, 7);
+
+    let dailyCount = 0;
+    let monthlyCount = 0;
+
+    for (const job of this.jobs.values()) {
+      if (job.userId === userId && job.leadsFound) {
+        const jobDateStr = job.createdAt.split('T')[0];
+        const jobMonthStr = jobDateStr.substring(0, 7);
+
+        if (jobDateStr === todayStr) dailyCount += job.leadsFound;
+        if (jobMonthStr === monthStr) monthlyCount += job.leadsFound;
+      }
+    }
+    return { dailyCount, monthlyCount };
   }
 
   getJob(jobId) {

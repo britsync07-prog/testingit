@@ -86,8 +86,7 @@ class DDGMultiNicheScraper:
         options.add_argument("--headless=new")
         options.add_argument("--window-size=1920,1080")
         options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36")
-        
-        self.driver = uc.Chrome(options=options)
+        self.driver = uc.Chrome(options=options, version_main=145)
 
     def load_progress(self):
         """Resumes from where it left off."""
@@ -234,18 +233,22 @@ class DDGMultiNicheScraper:
                         new_items_this_pass = True
                         
                         # Log success to server
-                        emit({
+                        payload = {
                             "type": "lead-saved",
                             "title": title,
                             "city": city,
                             "niche": niche,
                             "site": site,
                             "fileName": file_path.name,
-                            "emailFileName": email_file_path.name,
-                            "allEmailsFileName": "all_emails.txt",
                             "totalSavedForFile": saved_count + total_saved_for_query,
                             "message": f"Saved: {title[:30]}..."
-                        })
+                        }
+                        if email:
+                            payload["emailFileName"] = email_file_path.name
+                            payload["allEmailsFileName"] = "all_emails.txt"
+                            payload["email"] = email
+
+                        emit(payload)
                         
                     except Exception:
                         continue

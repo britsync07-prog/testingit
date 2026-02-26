@@ -4,6 +4,9 @@
    Fonts: Fira Sans (UI) + Fira Code (data/mono)
    ============================================================ */
 
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap');
+
+
 :root {
   --bg-base: #0a0d14;
   --bg-surface: #111827;
@@ -300,40 +303,46 @@ body {
 }
 
 /* ============================================================
-   CARDS
+   UI CARDS & CONTAINERS (Data-Dense Dashboard)
    ============================================================ */
-.card {
+.ui-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 20px;
+  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+
+.ui-card:hover {
+  border-color: var(--border-glow);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* For tight dashboard grid stacking */
+.ui-card.compact {
   padding: 16px;
   margin-bottom: 16px;
-  transition: border-color var(--transition);
 }
 
-.card:hover {
-  border-color: var(--border-glow);
-}
-
-.card:last-child {
+.ui-card.compact:last-child {
   margin-bottom: 0;
 }
 
 .card-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 14px;
-  padding-bottom: 10px;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
   border-bottom: 1px solid var(--border);
 }
 
 .card-header h2 {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
   letter-spacing: 0.02em;
-  text-transform: uppercase;
 }
 
 .card-header svg {
@@ -508,6 +517,354 @@ select {
   letter-spacing: 0.06em;
   margin-bottom: 6px;
 }
+
+
+/* ============================================================
+   SENDER DASHBOARD UI (DATA-DENSE METRICS)
+   ============================================================ */
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.metric-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: var(--transition);
+}
+
+.metric-card:hover {
+  border-color: var(--blue-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.metric-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Glowing Border Roles */
+.blue-glow {
+  background: var(--blue-glow);
+  color: var(--blue-primary);
+  border: 1px solid var(--blue-primary);
+}
+
+.green-glow {
+  background: var(--green-glow);
+  color: var(--green);
+  border: 1px solid var(--green);
+}
+
+.amber-glow {
+  background: var(--amber-glow);
+  color: var(--amber);
+  border: 1px solid var(--amber);
+}
+
+.purple-glow {
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--purple);
+  border: 1px solid var(--purple);
+}
+
+.metric-info h4 {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.metric-info .metric-val {
+  font-family: 'Fira Code', monospace;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+/* ── Split Builder Area ── */
+.campaign-builder-split {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-group.half {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+label .required {
+  color: var(--red);
+  margin-left: 2px;
+}
+
+.ui-input,
+.ui-textarea {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  padding: 10px 14px;
+  transition: var(--transition);
+}
+
+.ui-textarea {
+  resize: vertical;
+  min-height: 120px;
+  font-family: 'Fira Code', monospace;
+}
+
+.input-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+/* ── Buttons ── */
+.ui-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+}
+
+.ui-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.ui-btn-primary {
+  background: var(--blue-primary);
+  color: #fff;
+}
+
+.ui-btn-primary:hover:not(:disabled) {
+  background: var(--blue-dark);
+}
+
+.ui-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ui-btn-secondary {
+  background: var(--bg-input);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.ui-btn-secondary:hover {
+  border-color: var(--text-secondary);
+}
+
+.ui-btn-danger {
+  background: var(--red-glow);
+  color: var(--red);
+}
+
+.ui-btn-danger:hover {
+  background: var(--red);
+  color: #fff;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.btn-icon {
+  padding: 6px;
+  border-radius: 4px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.mt-4 {
+  margin-top: 16px;
+}
+
+/* ── Upload Zone ── */
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 32px 24px;
+  text-align: center;
+  background: var(--bg-input);
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.upload-zone:hover,
+.upload-zone.dragover {
+  border-color: var(--blue-primary);
+  background: var(--blue-glow);
+}
+
+.upload-zone svg {
+  margin-bottom: 12px;
+}
+
+.upload-zone h4 {
+  font-size: 14px;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.upload-zone p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.upload-zone code {
+  color: var(--blue-primary);
+  background: transparent;
+  padding: 0;
+}
+
+/* ── Audience Table ── */
+.audience-preview {
+  margin-top: 20px;
+}
+
+.audience-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.audience-stat-bubble {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 99px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.audience-stat-bubble .stat-num {
+  font-family: 'Fira Code', monospace;
+  color: var(--blue-primary);
+  font-weight: 600;
+}
+
+.audience-stat-bubble .stat-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.audience-list-wrapper {
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.data-table th,
+.data-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.data-table th {
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-weight: 500;
+  position: sticky;
+  top: 0;
+}
+
+.data-table td {
+  color: var(--text-primary);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  background: var(--bg-surface);
+}
+
+.status-badge.valid {
+  color: var(--green);
+  background: var(--green-glow);
+}
+
+.status-badge.invalid {
+  color: var(--red);
+  background: var(--red-glow);
+}
+
 
 .phone-query-preview code {
   display: block;

@@ -7,9 +7,14 @@ import session from "express-session";
 import sessionFileStore from "session-file-store";
 import validator from "html-validator";
 import juice from "juice";
+import rateLimit from "express-rate-limit"; // Security
 import { authenticate, requireAuth } from "./auth.js";
 import { JobQueue } from "./queue.js";
 import { expandNiches } from "./scraper.js";
+
+// Sender & Tracking Routes
+import trackingRoutes from "./sender/routes/trackingRoutes.js";
+import apiRoutes from "./sender/routes/apiRoutes.js";
 
 const FileStore = sessionFileStore(session);
 const __filename = fileURLToPath(import.meta.url);
@@ -54,6 +59,24 @@ const locationCache = {
   details: new Map()
 };
 
+// --- SENDER TRACKING SECURITY & ROUTES ---
+
+// 1. High-Performance Rate Limiter for Tracking
+// Protects against DDoS or analytics poisoning (spam clicks/opens)
+const trackingLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 500, // Limit each IP to 500 tracking events per window
+  message: "Too many tracking requests from this IP, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// 2. Mount high-volume Tracking gateway
+app.use("/track", trackingLimiter, trackingRoutes);
+
+// 3. Mount secure Analytics API gateway (requires Auth)
+app.use("/api/sender", requireAuth, apiRoutes);
+
 // --- AUTH ROUTES ---
 
 app.post("/api/login", async (req, res) => {
@@ -83,8 +106,12 @@ app.get("/api/me", (req, res) => {
     const activeJob = Array.from(queue.jobs.values()).find(
       j => j.userId === req.session.user.username && (j.status === "running" || j.status === "queued")
     );
+    const usage = queue.getUserUsage(req.session.user.username);
+
     return res.json({
       username: req.session.user.username,
+      subscriptionPlan: req.session.user.subscriptionPlan,
+      usage: usage,
       activeJobId: activeJob ? activeJob.id : null
     });
   }
@@ -241,6 +268,26 @@ app.post("/api/jobs", requireAuth, async (req, res) => {
     return res.status(400).json({ error: "country, cities, and niches are required." });
   }
 
+  // --- Subscription Plan Enforcement ---
+  const userPlan = req.session.user.subscriptionPlan || 'basic';
+  const usage = queue.getUserUsage(req.session.user.username);
+
+  if (userPlan === 'basic') {
+    if (includeGoogleMaps) return res.status(403).json({ error: "Basic plan does not include Google Maps scraping." });
+    if (scrapeMode !== 'emails') return res.status(403).json({ error: "Basic plan only allows scraping emails." });
+
+    if (usage.dailyCount >= 300) return res.status(403).json({ error: "Daily limit of 300 emails reached on Basic plan." });
+    if (usage.monthlyCount >= 9000) return res.status(403).json({ error: "Monthly limit of 9000 emails reached on Basic plan." });
+  } else if (userPlan === 'advance' || userPlan === 'premium') {
+    if (!includeGoogleMaps || scrapeMode !== 'both') {
+      return res.status(403).json({ error: "Advance/Premium plans require Google Maps and 'both' scrape mode (emails + phones) for high quality leads." });
+    }
+
+    if (usage.dailyCount >= 100) return res.status(403).json({ error: `Daily limit of 100 premium leads reached on ${userPlan} plan.` });
+    if (usage.monthlyCount >= 3000) return res.status(403).json({ error: `Monthly limit of 3000 premium leads reached on ${userPlan} plan.` });
+  }
+  // -------------------------------------
+
   try {
     await getCountryDetails(country); // Validate country/fetch cache
   } catch (error) {
@@ -249,7 +296,7 @@ app.post("/api/jobs", requireAuth, async (req, res) => {
 
   const jobData = {
     id: crypto.randomUUID(),
-    params: { country, cities, states, niches, includeGoogleMaps, scrapeMode, sites, category }
+    params: { country, cities, states, niches, includeGoogleMaps, scrapeMode, sites, category, userPlan }
   };
 
   const job = queue.addJob(jobData, req.session.user.username);

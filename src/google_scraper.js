@@ -202,12 +202,17 @@ async function main() {
                                 fs.appendFileSync(filePath, entry, "utf-8");
                                 savedCount++;
 
-                                emit({
-                                    type: "lead-saved", title, city, niche, site, fileName, emailFileName,
-                                    allEmailsFileName: "all_emails.txt",
+                                const payload = {
+                                    type: "lead-saved", title, city, niche, site, fileName,
                                     totalSavedForFile: savedCount,
                                     message: `[Google/Email] Saved: ${title.substring(0, 30)}...`
-                                });
+                                };
+                                if (email) {
+                                    payload.emailFileName = emailFileName;
+                                    payload.allEmailsFileName = "all_emails.txt";
+                                    payload.email = email;
+                                }
+                                emit(payload);
                             }
                             if (batchStart + 10 < results.length) await new Promise(r => setTimeout(r, 800 + Math.random() * 1200));
                         }

@@ -1,14 +1,14 @@
 // Utility function to fetch JSON
 async function fetchJson(url) {
-    const res = await fetch(url);
-    if (!res.ok) {
-        if (res.status === 401) {
-            window.location.href = '/login.html';
-            return;
-        }
-        throw new Error(`Failed to fetch ${url}`);
+  const res = await fetch(url);
+  if (!res.ok) {
+    if (res.status === 401) {
+      window.location.href = '/login.html';
+      return;
     }
-    return res.json();
+    throw new Error(`Failed to fetch ${url}`);
+  }
+  return res.json();
 }
 
 // Global state
@@ -27,75 +27,75 @@ const downloadBtn = document.getElementById('downloadBtn');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        const [catRes, histRes] = await Promise.all([
-            fetchJson('/api/categories'),
-            fetchJson('/api/history')
-        ]);
+  try {
+    const [catRes, histRes] = await Promise.all([
+      fetchJson('/api/categories'),
+      fetchJson('/api/history')
+    ]);
 
-        categories = catRes.categories || [];
-        userHistory = histRes || [];
+    categories = catRes.categories || [];
+    userHistory = histRes || [];
 
-        renderCategoryList();
-    } catch (err) {
-        console.error('Failed to load initial data:', err);
-        categoryListContainer.innerHTML = '<div class="empty-state">Failed to load categories.</div>';
-    }
+    renderCategoryList();
+  } catch (err) {
+    console.error('Failed to load initial data:', err);
+    categoryListContainer.innerHTML = '<div class="empty-state">Failed to load categories.</div>';
+  }
 });
 
 // Render the left Sidebar
 function renderCategoryList() {
-    if (categories.length === 0) {
-        categoryListContainer.innerHTML = `
+  if (categories.length === 0) {
+    categoryListContainer.innerHTML = `
       <div class="empty-state">
         <div style="font-size:13px; margin-bottom:12px;">No categories found.</div>
-        <a href="/" class="btn btn--primary btn--sm" style="text-decoration:none">Create one</a>
+        <a href="/dashboard.html" class="btn btn--primary btn--sm" style="text-decoration:none">Create one</a>
       </div>
     `;
-        return;
-    }
+    return;
+  }
 
-    categoryListContainer.innerHTML = '';
+  categoryListContainer.innerHTML = '';
 
-    categories.forEach(cat => {
-        // Count jobs in this category
-        const jobCount = userHistory.filter(job => job.params.category === cat.id).length;
+  categories.forEach(cat => {
+    // Count jobs in this category
+    const jobCount = userHistory.filter(job => job.params.category === cat.id).length;
 
-        const div = document.createElement('div');
-        div.className = `category-item ${selectedCategoryId === cat.id ? 'active' : ''}`;
-        div.innerHTML = `
+    const div = document.createElement('div');
+    div.className = `category-item ${selectedCategoryId === cat.id ? 'active' : ''}`;
+    div.innerHTML = `
       <div style="font-size: 14px; font-weight: 500;">${cat.name}</div>
       <div class="category-meta">${jobCount} job${jobCount === 1 ? '' : 's'} &bull; ${new Date(cat.createdAt).toLocaleDateString()}</div>
     `;
 
-        div.addEventListener('click', () => selectCategory(cat.id));
-        categoryListContainer.appendChild(div);
-    });
+    div.addEventListener('click', () => selectCategory(cat.id));
+    categoryListContainer.appendChild(div);
+  });
 }
 
 // Handle Category Selection
 function selectCategory(id) {
-    selectedCategoryId = id;
-    renderCategoryList(); // Update active states
+  selectedCategoryId = id;
+  renderCategoryList(); // Update active states
 
-    const cat = categories.find(c => c.id === id);
-    if (!cat) return;
+  const cat = categories.find(c => c.id === id);
+  if (!cat) return;
 
-    centerTitle.textContent = cat.name;
-    centerSubtitle.textContent = `Viewing jobs for ${cat.name}`;
+  centerTitle.textContent = cat.name;
+  centerSubtitle.textContent = `Viewing jobs for ${cat.name}`;
 
-    renderJobsList(cat.id);
+  renderJobsList(cat.id);
 
-    // Reset the file viewer when changing categories
-    clearFileViewer();
+  // Reset the file viewer when changing categories
+  clearFileViewer();
 }
 
 // Render the center Panel (Jobs belonging to selected category)
 function renderJobsList(categoryId) {
-    const jobs = userHistory.filter(job => job.params.category === categoryId);
+  const jobs = userHistory.filter(job => job.params.category === categoryId);
 
-    if (jobs.length === 0) {
-        jobsListContainer.innerHTML = `
+  if (jobs.length === 0) {
+    jobsListContainer.innerHTML = `
       <div class="empty-state">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
@@ -103,34 +103,34 @@ function renderJobsList(categoryId) {
         <span>No jobs found for this category.</span>
       </div>
     `;
-        return;
-    }
+    return;
+  }
 
-    jobsListContainer.innerHTML = '';
+  jobsListContainer.innerHTML = '';
 
-    jobs.forEach(job => {
-        const date = new Date(job.createdAt).toLocaleString();
-        const params = job.params;
+  jobs.forEach(job => {
+    const date = new Date(job.createdAt).toLocaleString();
+    const params = job.params;
 
-        // Categorize files
-        const emailFiles = (job.files || []).filter(f =>
-            f.includes("_emails.txt") || f === "all_emails.txt" || f === "google_maps_emails.txt"
-        );
-        const phoneFiles = (job.files || []).filter(f =>
-            f.includes("_phones.txt") || f === "all_phones.txt"
-        );
-        const csvFiles = (job.files || []).filter(f => f.endsWith('.csv'));
+    // Categorize files
+    const emailFiles = (job.files || []).filter(f =>
+      f.includes("_emails.txt") || f === "all_emails.txt" || f === "google_maps_emails.txt"
+    );
+    const phoneFiles = (job.files || []).filter(f =>
+      f.includes("_phones.txt") || f === "all_phones.txt"
+    );
+    const csvFiles = (job.files || []).filter(f => f.endsWith('.csv'));
 
-        // Create chips
-        const createChip = (fileName, typeClass, icon) => `
+    // Create chips
+    const createChip = (fileName, typeClass, icon) => `
       <div class="file-chip ${typeClass}" onclick="viewFile('${job.id}', '${fileName}', this)">
         <span>${icon}</span> ${fileName}
       </div>
     `;
 
-        const div = document.createElement('div');
-        div.className = 'cat-job-card';
-        div.innerHTML = `
+    const div = document.createElement('div');
+    div.className = 'cat-job-card';
+    div.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:flex-start;">
         <span class="status-chip ${job.status}">${job.status}</span>
         <span style="font-size:11px; color:var(--text-muted);">${date}</span>
@@ -150,46 +150,46 @@ function renderJobsList(categoryId) {
         ${(job.files || []).length === 0 ? '<span style="font-size:12px; color:var(--text-muted);">No files generated yet.</span>' : ''}
       </div>
     `;
-        jobsListContainer.appendChild(div);
-    });
+    jobsListContainer.appendChild(div);
+  });
 }
 
 // Fetch and display a file in the right Panel
 window.viewFile = async function (jobId, fileName, chipEl) {
-    // Update active state on chips
-    document.querySelectorAll('.file-chip').forEach(el => el.classList.remove('active'));
-    if (chipEl) chipEl.classList.add('active');
+  // Update active state on chips
+  document.querySelectorAll('.file-chip').forEach(el => el.classList.remove('active'));
+  if (chipEl) chipEl.classList.add('active');
 
-    viewerFileName.textContent = `Loading ${fileName}...`;
-    viewerFileName.style.color = 'var(--text-primary)';
+  viewerFileName.textContent = `Loading ${fileName}...`;
+  viewerFileName.style.color = 'var(--text-primary)';
 
-    downloadBtn.href = `/api/jobs/${jobId}/files/${fileName}`;
-    downloadBtn.setAttribute('download', fileName);
-    downloadBtn.style.display = 'inline-flex';
+  downloadBtn.href = `/api/jobs/${jobId}/files/${fileName}`;
+  downloadBtn.setAttribute('download', fileName);
+  downloadBtn.style.display = 'inline-flex';
 
-    viewerContent.innerHTML = `
+  viewerContent.innerHTML = `
     <div class="empty-state">
       <div class="spinner" style="width:24px; height:24px; border-width:3px; margin-bottom:16px;"></div>
       <span>Fetching file contents...</span>
     </div>
   `;
 
-    try {
-        const res = await fetch(`/api/jobs/${jobId}/files/${fileName}`);
-        if (!res.ok) throw new Error("Failed to load file");
+  try {
+    const res = await fetch(`/api/jobs/${jobId}/files/${fileName}`);
+    if (!res.ok) throw new Error("Failed to load file");
 
-        const text = await res.text();
-        viewerFileName.textContent = fileName;
+    const text = await res.text();
+    viewerFileName.textContent = fileName;
 
-        if (fileName.endsWith('.csv')) {
-            renderCsv(text, fileName);
-        } else {
-            renderRawText(text);
-        }
+    if (fileName.endsWith('.csv')) {
+      renderCsv(text, fileName);
+    } else {
+      renderRawText(text);
+    }
 
-    } catch (err) {
-        viewerFileName.textContent = fileName;
-        viewerContent.innerHTML = `
+  } catch (err) {
+    viewerFileName.textContent = fileName;
+    viewerContent.innerHTML = `
       <div class="empty-state" style="color:var(--red);">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
@@ -197,29 +197,29 @@ window.viewFile = async function (jobId, fileName, chipEl) {
         <span>Error loading file. It may no longer exist.</span>
       </div>
     `;
-        console.error(err);
-    }
+    console.error(err);
+  }
 };
 
 function renderCsv(text, fileName) {
-    const lines = text.split('\\n').filter(r => r.trim());
-    if (lines.length === 0) {
-        viewerContent.innerHTML = '<div class="empty-state">File is empty.</div>';
-        return;
+  const lines = text.split('\n').filter(r => r.trim());
+  if (lines.length === 0) {
+    viewerContent.innerHTML = '<div class="empty-state">File is empty.</div>';
+    return;
+  }
+
+  const tableRows = lines.map((row, idx) => {
+    // Basic CSV parser handling quoted strings
+    const cols = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || row.split(',');
+    const cleanCols = cols.map(c => c.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
+
+    if (idx === 0) {
+      return `<tr>${cleanCols.map(c => `<th>${c}</th>`).join('')}</tr>`;
     }
+    return `<tr>${cleanCols.map(c => `<td>${c}</td>`).join('')}</tr>`;
+  });
 
-    const tableRows = lines.map((row, idx) => {
-        // Basic CSV parser handling quoted strings
-        const cols = row.match(/(".*?"|[^",\\s]+)(?=\\s*,|\\s*$)/g) || row.split(',');
-        const cleanCols = cols.map(c => c.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
-
-        if (idx === 0) {
-            return `<tr>${cleanCols.map(c => `<th>${c}</th>`).join('')}</tr>`;
-        }
-        return `<tr>${cleanCols.map(c => `<td>${c}</td>`).join('')}</tr>`;
-    });
-
-    viewerContent.innerHTML = `
+  viewerContent.innerHTML = `
     <div style="width: 100%; height: 100%; overflow: auto;">
       <table class="csv-table">
         ${tableRows.join('')}
@@ -229,7 +229,7 @@ function renderCsv(text, fileName) {
 }
 
 function renderRawText(text) {
-    viewerContent.innerHTML = `
+  viewerContent.innerHTML = `
     <pre style="
       margin: 0; 
       padding: 24px; 
@@ -242,10 +242,10 @@ function renderRawText(text) {
 }
 
 function clearFileViewer() {
-    viewerFileName.textContent = "No file selected";
-    viewerFileName.style.color = "var(--text-muted)";
-    downloadBtn.style.display = "none";
-    viewerContent.innerHTML = `
+  viewerFileName.textContent = "No file selected";
+  viewerFileName.style.color = "var(--text-muted)";
+  downloadBtn.style.display = "none";
+  viewerContent.innerHTML = `
     <div class="empty-state">
        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/>

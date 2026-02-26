@@ -17,95 +17,43 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
+      background: var(--bg-base);
+      /* OLED pure dark */
     }
 
     .login-wrap {
       width: 100%;
-      max-width: 400px;
-      padding: 20px;
+      max-width: 420px;
+      padding: 24px;
     }
 
     .login-logo {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       justify-content: center;
-      margin-bottom: 28px;
-      font-size: 22px;
+      margin-bottom: 32px;
+      font-size: 24px;
       font-weight: 700;
       color: var(--blue-primary);
+      letter-spacing: -0.5px;
     }
 
-    .login-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 32px 28px;
+    .login-header {
+      text-align: center;
+      margin-bottom: 28px;
     }
 
     .login-title {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 700;
       color: var(--text-primary);
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
 
     .login-sub {
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-bottom: 24px;
-    }
-
-    .field {
-      margin-bottom: 16px;
-    }
-
-    .field label {
-      display: block;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      margin-bottom: 6px;
-      letter-spacing: 0.02em;
-    }
-
-    .field input {
-      width: 100%;
-      padding: 10px 12px;
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      color: var(--text-primary);
-      font-size: 13px;
-      font-family: 'Fira Sans', sans-serif;
-      outline: none;
-      transition: border-color var(--transition), box-shadow var(--transition);
-      box-sizing: border-box;
-    }
-
-    .field input:focus {
-      border-color: var(--blue-primary);
-      box-shadow: 0 0 0 3px var(--blue-glow);
-    }
-
-    .submit-btn {
-      width: 100%;
-      padding: 11px;
-      background: var(--blue-primary);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius-sm);
       font-size: 14px;
-      font-weight: 600;
-      font-family: 'Fira Sans', sans-serif;
-      cursor: pointer;
-      margin-top: 4px;
-      transition: all 150ms ease;
-      box-shadow: 0 0 20px var(--blue-glow);
-    }
-
-    .submit-btn:hover {
-      background: var(--blue-dark);
+      color: var(--text-secondary);
     }
 
     .remember {
@@ -114,12 +62,17 @@
       gap: 8px;
       font-size: 13px;
       color: var(--text-secondary);
-      margin-bottom: 20px;
+      margin-top: 16px;
+      margin-bottom: 24px;
     }
 
     .remember input {
       accent-color: var(--blue-primary);
       cursor: pointer;
+      width: 16px;
+      height: 16px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
     }
   </style>
 </head>
@@ -127,7 +80,7 @@
 <body>
   <div class="login-wrap">
     <div class="login-logo">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
         stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8" />
         <path d="m21 21-4.35-4.35" />
@@ -135,26 +88,42 @@
       </svg>
       LeadHunter
     </div>
-    <div class="login-card">
-      <div class="login-title">Welcome back</div>
-      <div class="login-sub">Sign in to your dashboard</div>
+
+    <div class="ui-card">
+      <div class="login-header">
+        <div class="login-title">Welcome back</div>
+        <div class="login-sub">Sign in to your data dashboard</div>
+      </div>
+
       <form id="loginForm">
-        <div class="field">
+        <div class="form-group">
           <label for="username">Username</label>
-          <input type="text" id="username" name="username" placeholder="admin" required autocomplete="username" />
+          <input type="text" id="username" name="username" class="ui-input" placeholder="admin" required
+            autocomplete="username" />
         </div>
-        <div class="field">
+
+        <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" name="password" placeholder="••••••••" required
+          <input type="password" id="password" name="password" class="ui-input" placeholder="••••••••" required
             autocomplete="current-password" />
         </div>
+
         <div class="remember">
           <input type="checkbox" id="rememberMe" name="rememberMe" />
-          <label for="rememberMe">Remember me for 30 days</label>
+          <label for="rememberMe" style="cursor: pointer;">Remember me for 30 days</label>
         </div>
-        <button type="submit" class="submit-btn">Sign In</button>
+
+        <button type="submit" class="ui-btn ui-btn-primary full-width">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+            <polyline points="10 17 15 12 10 7"></polyline>
+            <line x1="15" y1="12" x2="3" y2="12"></line>
+          </svg>
+          Sign In
+        </button>
       </form>
-      <div id="error" class="error-message" style="margin-top:12px"></div>
+      <div id="error" class="error-box" style="display:none; margin-top:20px;"></div>
     </div>
   </div>
   <script>
@@ -164,21 +133,27 @@
       const password = e.target.password.value;
       const rememberMe = e.target.rememberMe.checked;
       const errorDiv = document.getElementById("error");
+
+      errorDiv.style.display = 'none';
       errorDiv.textContent = '';
+
       try {
         const response = await fetch("/api/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username, password, rememberMe })
         });
+
         if (response.ok) {
-          window.location.href = "/";
+          window.location.href = "/dashboard.html";
         } else {
           const result = await response.json();
-          errorDiv.textContent = result.error || "Login failed. Check your credentials.";
+          errorDiv.innerHTML = `<strong>Failed:</strong><br>${result.error || "Login failed. Check your credentials."}`;
+          errorDiv.style.display = 'block';
         }
       } catch (error) {
-        errorDiv.textContent = "Something went wrong. Please try again.";
+        errorDiv.innerHTML = `<strong>Network Error:</strong><br>Something went wrong. Please try again.`;
+        errorDiv.style.display = 'block';
       }
     });
   </script>

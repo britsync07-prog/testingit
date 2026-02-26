@@ -68,9 +68,23 @@ async function checkAuth() {
     const user = await fetchJson("/api/me");
     currentUser = user;
     userInfoEl.textContent = `Logged in as: ${user.username}`;
+
+    // Display Usage Quota
+    const usageQuotaEl = document.getElementById('usageQuotaEl');
+    if (usageQuotaEl && user.usage) {
+      let dailyLimit = 300; let monthlyLimit = 9000;
+      if (user.subscriptionPlan !== 'basic') { dailyLimit = 100; monthlyLimit = 3000; }
+
+      usageQuotaEl.style.display = 'inline-block';
+      usageQuotaEl.textContent = `Emails: ${user.usage.dailyCount}/${dailyLimit} | Month: ${user.usage.monthlyCount}/${monthlyLimit}`;
+    }
+
     loadCountries();
     loadHistory();
     startQueuePolling();
+
+    // Apply UI locks based on subscription plan
+    applySubscriptionLocks(user.subscriptionPlan);
 
     if (user.activeJobId) {
       attachToJob(user.activeJobId);
@@ -79,6 +93,85 @@ async function checkAuth() {
     window.location.href = "/login.html";
   }
 }
+
+function applySubscriptionLocks(plan) {
+  const modeEmails = document.getElementById('modeEmails');
+  const modePhones = document.getElementById('modePhones');
+  const modeBoth = document.getElementById('modeBoth');
+  const mapsMode = document.getElementById('googleMapsMode');
+
+  const navSender = document.getElementById('navSender');
+  const navChecker = document.getElementById('navChecker');
+  const smPriorityWrap = document.querySelector('.sm-priority-wrap');
+
+  // Ensure Sender and Checker are ONLY visible for Premium users
+  if (plan !== 'premium') {
+    if (navSender) navSender.style.display = 'none';
+    if (navChecker) navChecker.style.display = 'none';
+  }
+
+  if (!modeEmails) return; // not on scraper dashboard
+
+  // Reset visual states
+  document.querySelectorAll('.mode-card').forEach(el => {
+    el.style.display = 'flex';
+    el.style.opacity = '1';
+    el.onclick = null; // remove potential old alerts
+  });
+  if (mapsMode) {
+    mapsMode.closest('div').style.display = 'block';
+    mapsMode.closest('div').style.opacity = '1';
+    mapsMode.disabled = false;
+  }
+  if (smPriorityWrap) smPriorityWrap.style.display = 'block';
+
+  modeEmails.disabled = false;
+  modePhones.disabled = false;
+  modeBoth.disabled = false;
+
+  if (plan === 'basic') {
+    // Basic: Emails only, No Maps
+    modePhones.disabled = true;
+    modeBoth.disabled = true;
+    modeEmails.checked = true;
+
+    if (mapsMode) {
+      mapsMode.value = 'no';
+      mapsMode.disabled = true;
+      mapsMode.closest('div').style.opacity = '0.5';
+      mapsMode.title = 'Upgrade your plan to unlock Google Maps scraping.';
+    }
+
+    document.querySelector('label[for="modePhones"]').style.opacity = '0.4';
+    document.querySelector('label[for="modeBoth"]').style.opacity = '0.4';
+
+    // Intercept clicks on disabled options to show upgrade message
+    const upgradeAlert = (e) => {
+      e.preventDefault();
+      alert("Please update your plan to access this feature.");
+    };
+    document.querySelector('label[for="modePhones"]').onclick = upgradeAlert;
+    document.querySelector('label[for="modeBoth"]').onclick = upgradeAlert;
+
+  } else if (plan === 'advance' || plan === 'premium') {
+    // Advance/Premium: Maps ONLY, Both ONLY. Hide the redundant UI options completely.
+    modeBoth.checked = true;
+
+    document.querySelector('label[for="modeEmails"]').style.display = 'none';
+    document.querySelector('label[for="modePhones"]').style.display = 'none';
+
+    // Also remove the "Social Media Priority" block since it's irrelevant for Maps-only
+    if (smPriorityWrap) {
+      smPriorityWrap.style.display = 'none';
+    }
+
+    if (mapsMode) {
+      mapsMode.closest('div').style.display = 'none'; // Lock Maps ON silently
+      mapsMode.value = 'yes';
+    }
+  }
+}
+
 
 function setStatus(text, mode = 'idle') {
   if (statusEl) statusEl.textContent = text;
@@ -133,16 +226,20 @@ function attachToJob(jobId) {
       setStatus(`Job ${jobId} running...`, 'running');
     }
 
-    if (payload.type === 'lead-saved' || payload.type === 'city-update') {
-      ensureFileLink(jobId, payload.fileName);
-      ensureFileLink(jobId, payload.emailFileName);
-      ensureFileLink(jobId, payload.allEmailsFileName);
-      ensurePhoneFileLink(jobId, payload.phoneFileName);
-      ensurePhoneFileLink(jobId, payload.allPhonesFileName);
+    if (payload.type === 'lead-saved' || payload.type === 'city-update' || payload.type === 'phone-saved') {
+      if (payload.fileName) ensureFileLink(jobId, payload.fileName);
+      if (payload.emailFileName) ensureFileLink(jobId, payload.emailFileName);
+      if (payload.allEmailsFileName) ensureFileLink(jobId, payload.allEmailsFileName);
+      if (payload.phoneFileName) ensureFileLink(jobId, payload.phoneFileName);
+      if (payload.allPhonesFileName) ensureFileLink(jobId, payload.allPhonesFileName);
     }
-    if (payload.type === 'phone-saved') {
-      ensurePhoneFileLink(jobId, payload.phoneFileName);
-      ensurePhoneFileLink(jobId, payload.allPhonesFileName);
+
+    if (payload.type === 'usage-update') {
+      const usageQuotaEl = document.getElementById('usageQuotaEl');
+      if (usageQuotaEl && payload.usage) {
+        usageQuotaEl.style.display = 'inline-block';
+        usageQuotaEl.textContent = `Emails: ${payload.usage.dailyCount}/${payload.dailyLimit} | Month: ${payload.usage.monthlyCount}/${payload.monthlyLimit}`;
+      }
     }
 
     if (payload.type === 'job-completed' || payload.type === 'job-complete' || payload.type === 'job-stopped' || payload.type === 'job-failed') {
@@ -336,32 +433,41 @@ async function loadHistory() {
       const date = new Date(job.createdAt).toLocaleString();
       const params = job.params;
 
-      const emailFiles = (job.files || []).filter(f =>
-        f.includes("_emails.txt") ||
-        f === "all_emails.txt" ||
-        f === "google_maps_emails.txt" ||
-        f.endsWith(".json") ||
-        f.endsWith(".csv")
-      );
+      const fileList = (job.files || []);
 
-      const phoneFiles = (job.files || []).filter(f =>
-        f.includes("_phones.txt") || f === "all_phones.txt"
-      );
+      const isPrimary = (f) => f === "all_emails.txt" || f === "all_phones.txt" || f.endsWith(".csv");
 
-      const fileButtons = [
-        ...emailFiles.map(f =>
-          `<div style="display:inline-flex; gap:4px; margin-bottom:4px; margin-right:4px;">
-             <a href="#" onclick="openFilePreview('${job.id}', '${f}'); return false;" class="download-btn" style="padding: 4px 6px;">&#x1F441; View</a>
-             <a data-file-name="${f}" href="/api/jobs/${job.id}/files/${f}" target="_blank" class="download-btn" style="border-top-left-radius:0; border-bottom-left-radius:0;">&#x2193; DL</a>
-           </div>`
-        ),
-        ...phoneFiles.map(f =>
-          `<div style="display:inline-flex; gap:4px; margin-bottom:4px; margin-right:4px;">
-             <a href="#" onclick="openFilePreview('${job.id}', '${f}'); return false;" class="download-btn" style="padding: 4px 6px; border-color:var(--purple);color:var(--purple);background:rgba(139,92,246,0.12)">&#x1F441; View</a>
-             <a data-file-name="${f}" href="/api/jobs/${job.id}/files/${f}" target="_blank" class="download-btn" style="border-top-left-radius:0; border-bottom-left-radius:0; border-color:var(--purple);color:var(--purple);background:rgba(139,92,246,0.12)">&#x2193; DL</a>
-           </div>`
-        )
-      ].join("");
+      const primaryFiles = fileList.filter(isPrimary);
+      const secondaryFiles = fileList.filter(f => !isPrimary(f) && (f.endsWith(".txt") || f.endsWith(".json")));
+
+      const renderFileBtn = (f, isPhone) => {
+        const style = isPhone ? `border-color:var(--purple);color:var(--purple);background:rgba(139,92,246,0.12)` : ``;
+        return `<div style="display:flex; align-items:center; justify-content:space-between; width:100%; padding:8px 10px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:6px; margin-bottom:6px;">
+           <span style="font-size:13px; font-weight:500; color:#374151; display:flex; align-items:center; gap:6px; word-break: break-all;">
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+             ${f}
+           </span>
+           <div style="display:flex; gap:4px; flex-shrink: 0;">
+             <a href="#" onclick="openFilePreview('${job.id}', '${f}'); return false;" class="download-btn" style="padding: 4px 8px; ${style}">View</a>
+             <a data-file-name="${f}" href="/api/jobs/${job.id}/files/${f}" target="_blank" class="download-btn" style="padding: 4px 8px; ${style}">Download</a>
+           </div>
+         </div>`;
+      };
+
+      const primaryHtml = primaryFiles.map(f => renderFileBtn(f, f.includes("phone"))).join("");
+      const secondaryHtml = secondaryFiles.map(f => renderFileBtn(f, f.includes("phone"))).join("");
+
+      const toggleSecondaryBtn = secondaryFiles.length > 0
+        ? `<div style="width: 100%; margin-top: 5px;"><button class="btn btn--ghost btn--sm" onclick="toggleSecondaryFiles('sec-${job.id}')" style="font-size: 0.75rem; padding: 4px 8px; width:100%; justify-content:center;">Show all files (${secondaryFiles.length})</button></div>`
+        : "";
+
+      const fileButtons = `
+        ${primaryHtml}
+        ${toggleSecondaryBtn}
+        <div id="sec-${job.id}" style="display: none; width: 100%; margin-top: 8px; flex-direction: column;">
+          ${secondaryHtml}
+        </div>
+      `;
 
       const isStoppable = job.status === "running" || job.status === "queued";
       const stopButton = isStoppable ? `<button class="stop-btn" onclick="stopJob('${job.id}')">&#x25A0; Stop</button>` : "";
@@ -384,7 +490,7 @@ async function loadHistory() {
           </div>
         </div>
         ${job.error ? `<div class="error-message" style="margin-top:6px">Error: ${job.error}</div>` : ""}
-        <div id="${emailListId}" class="email-dropdown" style="display: none;">
+        <div id="${emailListId}" class="email-dropdown" style="display: none; flex-direction: column;">
           ${fileButtons}
         </div>
       `;
@@ -403,6 +509,19 @@ window.toggleEmails = function (id) {
     const btn = el.previousElementSibling.querySelector('.toggle-btn');
     if (btn) {
       btn.textContent = el.style.display === "none" ? "View Files" : "Hide Files";
+    }
+  }
+};
+
+window.toggleSecondaryFiles = function (id) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.style.display = el.style.display === "none" ? "flex" : "none";
+    const btn = el.previousElementSibling.querySelector('button');
+    if (btn) {
+      const isHidden = el.style.display === "none";
+      const count = el.children.length;
+      btn.textContent = isHidden ? `Show all files (${count})` : `Hide extra files`;
     }
   }
 };
@@ -458,6 +577,9 @@ document.getElementById("run").addEventListener("click", async () => {
   let sites = [...allSites];
   const smLeaveItEl = document.getElementById("smLeaveIt");
 
+  const runErrorBox = document.getElementById("runErrorBox");
+  if (runErrorBox) runErrorBox.style.display = "none";
+
   if (smLeaveItEl && !smLeaveItEl.checked) {
     const selectedSites = Array.from(document.querySelectorAll(".sm-site:checked")).map(el => el.value);
     if (selectedSites.length > 0) {
@@ -467,7 +589,11 @@ document.getElementById("run").addEventListener("click", async () => {
   }
 
   if (!niches.length || !cities.length) {
-    statusEl.textContent = "Select at least one niche and one city.";
+    if (runErrorBox) {
+      runErrorBox.innerHTML = "<strong>Missing Fields:</strong><br>Please select at least one niche and one city before starting.";
+      runErrorBox.style.display = "block";
+    }
+    setStatus("Select at least one niche and one city.", 'error');
     return;
   }
 
@@ -512,16 +638,20 @@ document.getElementById("run").addEventListener("click", async () => {
         setStatus(`Job ${jobId} running...`, 'running');
       }
 
-      if (payload.type === 'lead-saved' || payload.type === 'city-update') {
-        ensureFileLink(jobId, payload.fileName);
-        ensureFileLink(jobId, payload.emailFileName);
-        ensureFileLink(jobId, payload.allEmailsFileName);
-        ensurePhoneFileLink(jobId, payload.phoneFileName);
-        ensurePhoneFileLink(jobId, payload.allPhonesFileName);
+      if (payload.type === 'lead-saved' || payload.type === 'city-update' || payload.type === 'phone-saved') {
+        if (payload.fileName) ensureFileLink(jobId, payload.fileName);
+        if (payload.emailFileName) ensureFileLink(jobId, payload.emailFileName);
+        if (payload.allEmailsFileName) ensureFileLink(jobId, payload.allEmailsFileName);
+        if (payload.phoneFileName) ensureFileLink(jobId, payload.phoneFileName);
+        if (payload.allPhonesFileName) ensureFileLink(jobId, payload.allPhonesFileName);
       }
-      if (payload.type === 'phone-saved') {
-        ensurePhoneFileLink(jobId, payload.phoneFileName);
-        ensurePhoneFileLink(jobId, payload.allPhonesFileName);
+
+      if (payload.type === 'usage-update') {
+        const usageQuotaEl = document.getElementById('usageQuotaEl');
+        if (usageQuotaEl && payload.usage) {
+          usageQuotaEl.style.display = 'inline-block';
+          usageQuotaEl.textContent = `Emails: ${payload.usage.dailyCount}/${payload.dailyLimit} | Month: ${payload.usage.monthlyCount}/${payload.monthlyLimit}`;
+        }
       }
 
       if (payload.type === 'job-completed' || payload.type === 'job-complete') {
@@ -543,75 +673,75 @@ document.getElementById("run").addEventListener("click", async () => {
 
     stream.onerror = () => console.log('Job stream disconnected (might be finished or queued).');
   } catch (error) {
-    statusEl.textContent = `Error: ${error.message}`;
+    if (runErrorBox) {
+      runErrorBox.innerHTML = `<strong>Could not start scraper:</strong><br>${error.message}`;
+      runErrorBox.style.display = "block";
+    }
+    setStatus(`Failed to start: ${error.message}`, 'error');
   }
 });
 
 function ensureFileLink(jobId, fileName) {
   if (!fileName) return;
-  if (!fileName.includes("_emails.txt") && fileName !== "all_emails.txt" && !fileName.endsWith(".json") && fileName !== "google_maps_emails.txt") return;
-
-  const existingGlobal = filesEl.querySelector(`a[data-file-name="${fileName}"]`);
-  if (!existingGlobal) {
-    const li = document.createElement("li");
-    li.style.display = "inline-flex";
-    li.style.gap = "4px";
-    li.style.marginRight = "6px";
-    li.style.marginBottom = "6px";
-    li.innerHTML = `
-      <a href="#" onclick="openFilePreview('${jobId}', '${fileName}'); return false;" class="download-btn" style="padding: 4px 6px;">&#x1F441; View</a>
-      <a data-file-name="${fileName}" class="download-btn" style="border-top-left-radius:0; border-bottom-left-radius:0;" href="/api/jobs/${jobId}/files/${fileName}" target="_blank">&#x2193; DL</a>
-    `;
-    filesEl.appendChild(li);
-  }
+  // We accept all files now so we can categorize them
 
   const historyContainer = document.getElementById(`emails-${jobId}`);
-  if (historyContainer) {
-    const existingHistory = historyContainer.querySelector(`a[data-file-name="${fileName}"]`);
-    if (!existingHistory) {
-      historyContainer.insertAdjacentHTML("beforeend", `
-        <div style="display:inline-flex; gap:4px; margin-bottom:4px; margin-right:4px;">
-          <a href="#" onclick="openFilePreview('${jobId}', '${fileName}'); return false;" class="download-btn" style="padding: 4px 6px;">&#x1F441; View</a>
-          <a data-file-name="${fileName}" href="/api/jobs/${jobId}/files/${fileName}" target="_blank" class="download-btn" style="border-top-left-radius:0; border-bottom-left-radius:0;">&#x2193; DL</a>
-        </div>
-      `);
+  if (!historyContainer) return; // Wait for history to render first
+
+  const isPrimary = fileName === "all_emails.txt" || fileName === "all_phones.txt" || fileName.endsWith(".csv");
+  const existing = historyContainer.querySelector(`a[data-file-name="${fileName}"]`);
+  if (existing) return;
+
+  const style = fileName.includes("phone") ? `border-color:var(--purple);color:var(--purple);background:rgba(139,92,246,0.12)` : ``;
+  const fileHtml = `
+    <div style="display:flex; align-items:center; justify-content:space-between; width:100%; padding:8px 10px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:6px; margin-bottom:6px;">
+      <span style="font-size:13px; font-weight:500; color:#374151; display:flex; align-items:center; gap:6px; word-break: break-all;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+        ${fileName}
+      </span>
+      <div style="display:flex; gap:4px; flex-shrink: 0;">
+        <a href="#" onclick="openFilePreview('${jobId}', '${fileName}'); return false;" class="download-btn" style="padding: 4px 8px; ${style}">View</a>
+        <a data-file-name="${fileName}" href="/api/jobs/${jobId}/files/${fileName}" target="_blank" class="download-btn" style="padding: 4px 8px; ${style}">Download</a>
+      </div>
+    </div>
+  `;
+
+  if (isPrimary) {
+    // Insert before the toggle button or secondary container
+    const toggleBtnDiv = historyContainer.querySelector('div[style*="width: 100%"]');
+    if (toggleBtnDiv) {
+      toggleBtnDiv.insertAdjacentHTML("beforebegin", fileHtml);
+    } else {
+      historyContainer.insertAdjacentHTML("afterbegin", fileHtml);
     }
+  } else {
+    // It's a secondary file
+    let secContainer = document.getElementById(`sec-${jobId}`);
+
+    // Create the secondary container and toggle if it doesn't exist yet
+    if (!secContainer) {
+      const toggleHtml = `<div style="width: 100%; margin-top: 5px;"><button class="btn btn--ghost btn--sm" onclick="toggleSecondaryFiles('sec-${jobId}')" style="font-size: 0.75rem; padding: 4px 8px; width:100%; justify-content:center;">Show all files (1)</button></div>`;
+      secContainer = document.createElement('div');
+      secContainer.id = `sec-${jobId}`;
+      secContainer.style.cssText = "display: none; width: 100%; margin-top: 8px; flex-direction: column;";
+      historyContainer.insertAdjacentHTML("beforeend", toggleHtml);
+      historyContainer.appendChild(secContainer);
+    } else {
+      // Update count
+      const btn = secContainer.previousElementSibling.querySelector('button');
+      if (btn) {
+        const count = secContainer.children.length + 1;
+        if (secContainer.style.display === "none") {
+          btn.textContent = `Show all files (${count})`;
+        }
+      }
+    }
+
+    secContainer.insertAdjacentHTML("beforeend", fileHtml);
   }
 }
 
-function ensurePhoneFileLink(jobId, fileName) {
-  if (!fileName) return;
-  if (!fileName.includes("_phones.txt") && fileName !== "all_phones.txt") return;
 
-  if (phoneFilesEl) {
-    const existing = phoneFilesEl.querySelector(`a[data-file-name="${fileName}"]`);
-    if (!existing) {
-      const li = document.createElement("li");
-      li.style.display = "inline-flex";
-      li.style.gap = "4px";
-      li.style.marginRight = "6px";
-      li.style.marginBottom = "6px";
-      li.innerHTML = `
-        <a href="#" onclick="openFilePreview('${jobId}', '${fileName}'); return false;" class="download-btn" style="padding: 4px 6px; border-color:var(--purple);color:var(--purple);background:rgba(139,92,246,0.12)">&#x1F441; View</a>
-        <a data-file-name="${fileName}" class="download-btn" style="border-top-left-radius:0; border-bottom-left-radius:0; border-color:var(--purple);color:var(--purple);background:rgba(139,92,246,0.12)" href="/api/jobs/${jobId}/files/${fileName}" target="_blank">&#x2193; DL</a>
-      `;
-      phoneFilesEl.appendChild(li);
-    }
-  }
-
-  const historyContainer = document.getElementById(`emails-${jobId}`);
-  if (historyContainer) {
-    const existing = historyContainer.querySelector(`a[data-file-name="${fileName}"]`);
-    if (!existing) {
-      historyContainer.insertAdjacentHTML("beforeend", `
-        <div style="display:inline-flex; gap:4px; margin-bottom:4px; margin-right:4px;">
-          <a href="#" onclick="openFilePreview('${jobId}', '${fileName}'); return false;" class="download-btn" style="padding: 4px 6px; border-color:var(--purple);color:var(--purple);background:rgba(139,92,246,0.12)">&#x1F441; View</a>
-          <a data-file-name="${fileName}" href="/api/jobs/${jobId}/files/${fileName}" target="_blank" class="download-btn" style="border-top-left-radius:0; border-bottom-left-radius:0; border-color:var(--purple);color:var(--purple);background:rgba(139,92,246,0.12)">&#x2193; DL</a>
-        </div>
-      `);
-    }
-  }
-}
 
 // ── Phone query preview event wiring ─────────────────────────
 document.querySelectorAll('input[name="scrapeMode"]').forEach(r => r.addEventListener('change', updatePhoneQueryPreview));

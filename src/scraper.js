@@ -69,7 +69,7 @@ export class LeadScraper {
     return true;
   }
 
-  async runMapsScraper({ country, cities, niches, outputDir }) {
+  async runMapsScraper({ country, cities, niches, outputDir, userPlan }) {
     this.mapsScraper = new BusinessScraper();
     await this.mapsScraper.init();
 
@@ -103,7 +103,22 @@ export class LeadScraper {
           this.onProgress({ type: "log", message: `[Maps] Searching: ${query}` });
 
           await this.mapsScraper.scrapeGoogleMaps(query, 999);
-          const leads = await this.mapsScraper.processResults(999);
+          let leads = await this.mapsScraper.processResults(999);
+
+          if (userPlan === 'advance' || userPlan === 'premium') {
+            const originalCount = leads.length;
+            leads = leads.filter(lead => {
+              const hasEmail = lead.possibleEmails && lead.possibleEmails.length > 0;
+              const rawPhone = lead.phone || "";
+              const extractedPhones = rawPhone
+                ? extractPhones(rawPhone, country)
+                : extractPhones([lead.name, lead.address].join(" "), country);
+              const hasPhone = extractedPhones && extractedPhones.length > 0;
+
+              return hasEmail && hasPhone;
+            });
+            this.onProgress({ type: "log", message: `[Maps] Strict Quality Filter applied: Kept ${leads.length} out of ${originalCount} leads.` });
+          }
 
           // Save the raw JSON data just in case you need business names/phones later
           const mapsLeadsJsonName = `maps_${safeCity}_leads.json`;
@@ -162,11 +177,15 @@ export class LeadScraper {
 
           // ── CSV EXPORT ──────────────────────────────────────
           if (leads.length > 0) {
-            const csvFileName = `google_maps_${safeCity}.csv`;
+            const csvFileName = `google_maps_all.csv`;
             const csvPath = path.join(outputDir, csvFileName);
 
-            // Build CSV header
-            let csvContent = "Name,Phone,Emails,Website,Rating,Address,Source Link\n";
+            // Build CSV header if file doesn't exist yet
+            const fileExists = fs.existsSync(csvPath);
+            let csvContent = "";
+            if (!fileExists) {
+              csvContent += "Name,Phone,Emails,Website,Rating,Address,Source Link\n";
+            }
 
             leads.forEach(lead => {
               const escapeCsv = (str) => `"${(str || '').toString().replace(/"/g, '""')}"`;
@@ -185,7 +204,7 @@ export class LeadScraper {
               ].join(",") + "\n";
             });
 
-            fs.writeFileSync(csvPath, csvContent, "utf8");
+            fs.appendFileSync(csvPath, csvContent, "utf8");
             this.onProgress({
               type: "csv-saved",
               fileName: csvFileName,
@@ -209,7 +228,7 @@ export class LeadScraper {
     }
   }
 
-  async run({ jobId, country, cities, states = [], niches, includeGoogleMaps = true, scrapeMode = 'emails', sites }) {
+  async run({ jobId, country, cities, states = [], niches, includeGoogleMaps = true, scrapeMode = 'emails', sites, userPlan = 'basic' }) {
     if (sites && sites.length) {
       this.sites = sites;
     }
@@ -229,7 +248,7 @@ export class LeadScraper {
     // 1. Run Google Maps Scraper (useful for both phones and emails)
     if (includeGoogleMaps && !this.isStopped) {
       this.onProgress({ type: "log", message: "Starting Google Maps Scraper phase..." });
-      await this.runMapsScraper({ country, cities, niches: expandedNichesList, outputDir });
+      await this.runMapsScraper({ country, cities, niches: expandedNichesList, outputDir, userPlan });
     }
 
     // 2. Run Google Search Scraper FIRST
@@ -317,7 +336,7 @@ export class LeadScraper {
     try {
 
       // 3. Finalize and report total collected files
-      const files = fs.readdirSync(outputDir).filter(f => f.endsWith('.txt') || f.endsWith('.json'));
+      const files = fs.readdirSync(outputDir).filter(f => f.endsWith('.txt') || f.endsWith('.json') || f.endsWith('.csv'));
       const finalResult = {
         files,
         expandedNiches: expandedNichesList,
