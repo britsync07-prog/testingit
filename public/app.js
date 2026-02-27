@@ -255,7 +255,7 @@ function attachToJob(jobId) {
   stream.onerror = () => console.log('Job stream disconnected.');
 }
 
-logoutBtn.addEventListener("click", async () => {
+logoutBtn?.addEventListener("click", async () => {
   await fetch("/api/logout", { method: "POST" });
   window.location.href = "/login.html";
 });
@@ -281,7 +281,7 @@ function renderCheckboxList(container, values, selectAllEl) {
 
 function setupSelectAll(selectAllEl, container) {
   if (!selectAllEl || !container) return;
-  selectAllEl.addEventListener("change", (e) => {
+  selectAllEl?.addEventListener("change", (e) => {
     const isChecked = e.target.checked;
     const checkboxes = container.querySelectorAll("input[type='checkbox']");
     checkboxes.forEach(cb => {
@@ -332,7 +332,7 @@ async function loadLocationDetails(country) {
   }
 }
 
-countryEl.addEventListener("change", async () => {
+countryEl?.addEventListener("change", async () => {
   await loadLocationDetails(countryEl.value);
 });
 
@@ -366,7 +366,7 @@ async function loadCategories() {
 // Handle Add Category Button
 const addCategoryBtn = document.getElementById("addCategoryBtn");
 if (addCategoryBtn) {
-  addCategoryBtn.addEventListener("click", async (e) => {
+  addCategoryBtn?.addEventListener("click", async (e) => {
     e.preventDefault();
     const name = prompt("Enter a name for the new category:");
     if (!name?.trim()) return;
@@ -405,7 +405,7 @@ if (addCategoryBtn) {
 // Add event listener to the history category filter
 const historyCategoryFilter = document.getElementById("historyCategoryFilter");
 if (historyCategoryFilter) {
-  historyCategoryFilter.addEventListener("change", () => loadHistory());
+  historyCategoryFilter?.addEventListener("change", () => loadHistory());
 }
 
 async function loadHistory() {
@@ -551,7 +551,7 @@ function startQueuePolling() {
   setInterval(updateQueueStatus, 5000);
 }
 
-document.getElementById("expandNiches").addEventListener("click", async () => {
+document.getElementById("expandNiches")?.addEventListener("click", async () => {
   const niches = nichesEl.value.split("\n").map((x) => x.trim()).filter(Boolean);
   if (!niches.length) return;
   try {
@@ -566,7 +566,7 @@ document.getElementById("expandNiches").addEventListener("click", async () => {
   }
 });
 
-document.getElementById("run").addEventListener("click", async () => {
+document.getElementById("run")?.addEventListener("click", async () => {
   const niches = nichesEl.value.split("\n").map((x) => x.trim()).filter(Boolean);
   const states = selectedValues(stateContainer);
   const cities = selectedValues(cityContainer);
@@ -839,3 +839,5 @@ checkAuth();
 loadCountries();
 loadCategories();
 startQueuePolling();
+
+export { fetchJson, checkAuth as checkAuthAndSetupSidebar };

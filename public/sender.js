@@ -225,6 +225,31 @@ btnLaunchCampaign.addEventListener('click', async () => {
   }
 });
 
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Re-bind just in case they fired too early
+    const reBtnBrowse = document.getElementById('btnBrowseFile');
+    const reAudienceFile = document.getElementById('audienceFile');
+    const reCsvDropZone = document.getElementById('csvDropZone');
+    const reBtnClear = document.getElementById('btnClearAudience');
+    const reBtnLaunch = document.getElementById('btnLaunchCampaign');
+    
+    if (reBtnBrowse && reAudienceFile) {
+        // Clear any old listeners if possible by cloning
+        const newBtnBrowse = reBtnBrowse.cloneNode(true);
+        reBtnBrowse.parentNode.replaceChild(newBtnBrowse, reBtnBrowse);
+        
+        newBtnBrowse.addEventListener('click', (e) => {
+            e.preventDefault();
+            reAudienceFile.click();
+        });
+        
+        reAudienceFile.addEventListener('change', (e) => {
+            handleFileUpload(e.target.files[0]);
+        });
+    }
+});
+
 // --- INIT ---
 async function init() {
   currentUser = await checkAuthAndSetupSidebar();
