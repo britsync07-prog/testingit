@@ -11,11 +11,14 @@ const PIXEL_BUFFER = Buffer.from(TRANSPARENT_GIF_BASE64, 'base64');
  * We ignore these to prevent massively inflated false-positive "Open" rates.
  */
 const BOT_USER_AGENTS = [
-    'Mozilla/5.0', // Vague, often scanners
-    'Apple-Mail', // Heuristic match for desktop caching
-    'GoogleImageProxy',
+    'Apple-Mail', // Heuristic match for desktop caching (Apple Mail Privacy Protection)
     'YahooMailProxy',
-    'Microsoft-Office-Scanner'
+    'Microsoft-Office-Scanner',
+    'Barracuda',
+    'Mimecast',
+    'bot',
+    'crawler',
+    'spider'
 ];
 
 /**
