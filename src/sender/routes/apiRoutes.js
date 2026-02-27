@@ -1,10 +1,11 @@
 import express from 'express';
-import { getCampaignAnalytics } from '../controllers/analyticsController.js';
+import { getCampaignAnalytics, getAccountAnalytics } from '../controllers/analyticsController.js';
 import { launchCampaign } from '../controllers/campaignController.js';
 
 const router = express.Router();
 
 // --- Analytics Endpoints ---
+router.get('/analytics/account', getAccountAnalytics);
 router.get('/analytics/:campaignId', getCampaignAnalytics);
 
 // --- Campaign Management Endpoints ---

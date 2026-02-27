@@ -227,28 +227,43 @@ btnLaunchCampaign.addEventListener('click', async () => {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Re-bind just in case they fired too early
-    const reBtnBrowse = document.getElementById('btnBrowseFile');
-    const reAudienceFile = document.getElementById('audienceFile');
-    const reCsvDropZone = document.getElementById('csvDropZone');
-    const reBtnClear = document.getElementById('btnClearAudience');
-    const reBtnLaunch = document.getElementById('btnLaunchCampaign');
-    
-    if (reBtnBrowse && reAudienceFile) {
-        // Clear any old listeners if possible by cloning
-        const newBtnBrowse = reBtnBrowse.cloneNode(true);
-        reBtnBrowse.parentNode.replaceChild(newBtnBrowse, reBtnBrowse);
-        
-        newBtnBrowse.addEventListener('click', (e) => {
-            e.preventDefault();
-            reAudienceFile.click();
-        });
-        
-        reAudienceFile.addEventListener('change', (e) => {
-            handleFileUpload(e.target.files[0]);
-        });
-    }
+  // Re-bind just in case they fired too early
+  const reBtnBrowse = document.getElementById('btnBrowseFile');
+  const reAudienceFile = document.getElementById('audienceFile');
+  const reCsvDropZone = document.getElementById('csvDropZone');
+  const reBtnClear = document.getElementById('btnClearAudience');
+  const reBtnLaunch = document.getElementById('btnLaunchCampaign');
+
+  if (reBtnBrowse && reAudienceFile) {
+    // Clear any old listeners if possible by cloning
+    const newBtnBrowse = reBtnBrowse.cloneNode(true);
+    reBtnBrowse.parentNode.replaceChild(newBtnBrowse, reBtnBrowse);
+
+    newBtnBrowse.addEventListener('click', (e) => {
+      e.preventDefault();
+      reAudienceFile.click();
+    });
+
+    reAudienceFile.addEventListener('change', (e) => {
+      handleFileUpload(e.target.files[0]);
+    });
+  }
 });
+
+// --- KPI DATA FETCHING ---
+const loadKPIs = async () => {
+  try {
+    const data = await fetchJson('/api/sender/analytics/account');
+    if (data && data.metrics) {
+      kpiTotalSent.innerText = data.rawCounts.sent.toLocaleString();
+      kpiDeliveryRate.innerText = data.metrics.deliveryRate;
+      kpiOpenRate.innerText = data.metrics.openRate;
+      kpiClickRate.innerText = data.metrics.clickThroughRate;
+    }
+  } catch (err) {
+    console.error("Failed to load KPIs:", err);
+  }
+};
 
 // --- INIT ---
 async function init() {
@@ -259,6 +274,9 @@ async function init() {
     window.location.href = "/dashboard.html";
     return;
   }
+
+  // Hydrate metrics on page load
+  await loadKPIs();
 }
 
 init();

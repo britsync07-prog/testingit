@@ -79,6 +79,69 @@ const getCampaignAnalytics = (req, res) => {
   }
 };
 
+const getAccountAnalytics = (req, res) => {
+  // `userId` fallback mirrors campaignController's behavior
+  const userId = req.session?.user?.username || req.session?.user?.id || 'admin_user';
+
+  try {
+    const recipientStats = db.prepare(`
+      SELECT 
+        COUNT(r.id) as totalSent,
+        SUM(CASE WHEN r.status = 'delivered' THEN 1 ELSE 0 END) as deliveredCount,
+        SUM(CASE WHEN r.status = 'bounced' THEN 1 ELSE 0 END) as bouncedCount
+      FROM recipients r
+      JOIN campaigns c ON r.campaignId = c.id
+      WHERE c.userId = ?
+    `).get(userId);
+
+    const eventStats = db.prepare(`
+      SELECT 
+        SUM(CASE WHEN eventType = 'OPEN' THEN 1 ELSE 0 END) as uniqueOpens,
+        SUM(CASE WHEN eventType = 'CLICK' THEN 1 ELSE 0 END) as uniqueClicks,
+        SUM(CASE WHEN eventType = 'WEBSITE_VISIT' THEN 1 ELSE 0 END) as uniqueVisits
+      FROM (
+        SELECT e.eventType, e.recipientId 
+        FROM event_logs e
+        JOIN campaigns c ON e.campaignId = c.id
+        WHERE c.userId = ?
+        GROUP BY e.eventType, e.recipientId
+      )
+    `).get(userId);
+
+    const sent = recipientStats?.totalSent || 0;
+    const delivered = recipientStats?.deliveredCount || 0;
+    const bounced = recipientStats?.bouncedCount || 0;
+
+    const opens = eventStats?.uniqueOpens || 0;
+    const clicks = eventStats?.uniqueClicks || 0;
+    const visits = eventStats?.uniqueVisits || 0;
+
+    const deliveryRate = sent > 0 ? (delivered / sent) * 100 : 0;
+    const bounceRate = sent > 0 ? (bounced / sent) * 100 : 0;
+    const openRate = delivered > 0 ? (opens / delivered) * 100 : 0;
+    const clickThroughRate = delivered > 0 ? (clicks / delivered) * 100 : 0; // CTR
+    const clickToOpenRate = opens > 0 ? (clicks / opens) * 100 : 0; // CTOR
+    const websiteVisitRate = clicks > 0 ? (visits / clicks) * 100 : 0;
+
+    res.json({
+      rawCounts: { sent, delivered, bounced, uniqueOpens: opens, uniqueClicks: clicks, uniqueVisits: visits },
+      metrics: {
+        deliveryRate: deliveryRate.toFixed(1) + '%',
+        bounceRate: bounceRate.toFixed(1) + '%',
+        openRate: openRate.toFixed(1) + '%',
+        clickThroughRate: clickThroughRate.toFixed(1) + '%',
+        clickToOpenRate: clickToOpenRate.toFixed(1) + '%',
+        websiteVisitRate: websiteVisitRate.toFixed(1) + '%'
+      }
+    });
+
+  } catch (error) {
+    console.error(`[Analytics Controller] Error calculating account metrics: ${error.message}`);
+    res.status(500).json({ error: 'Failed to calculate account analytics.' });
+  }
+};
+
 export {
-  getCampaignAnalytics
+  getCampaignAnalytics,
+  getAccountAnalytics
 };

@@ -48,7 +48,8 @@ const launchCampaign = async (req, res) => {
 
         // 3. Initialize Campaign in SQLite
         const campaignId = uuidv4();
-        const userId = req.session?.user?.id || 'admin_user'; // Fallback if session missing in dev
+        // Extract the actual logged-in username, or fallback to the session ID if it's an API key
+        const userId = req.session?.user?.username || req.session?.user?.id || 'admin_user';
 
         db.prepare(`INSERT INTO campaigns (id, userId, name, status) VALUES (?, ?, ?, 'sending')`)
             .run(campaignId, userId, campaignName);

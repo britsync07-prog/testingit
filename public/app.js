@@ -293,7 +293,10 @@ function setupSelectAll(selectAllEl, container) {
 setupSelectAll(selectAllStates, stateContainer);
 setupSelectAll(selectAllCities, cityContainer);
 
-async function fetchJson(url, options) {
+async function fetchJson(url, options = {}) {
+  // Always include session cookie for backend authentication
+  options.credentials = options.credentials || "include";
+
   const response = await fetch(url, options);
   if (response.status === 401 && !url.includes("/api/me")) {
     window.location.href = "/login.html";
