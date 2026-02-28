@@ -69,7 +69,45 @@ async function checkAuth() {
     currentUser = user;
     userInfoEl.textContent = `Logged in as: ${user.username}`;
 
-    // Display Usage Quota
+    // Display Usage Quota and Active Plan
+    const currentPlanEl = document.getElementById('currentPlanEl');
+    if (currentPlanEl && user.subscriptionPlan) {
+      currentPlanEl.classList.remove('hidden');
+      currentPlanEl.style.display = 'inline-block';
+      let showTrial = false;
+
+      if (user.trialEndsAt) {
+        const tEnd = new Date(user.trialEndsAt);
+        if (tEnd > new Date()) {
+          showTrial = true;
+          const daysLeft = Math.ceil((tEnd - new Date()) / (1000 * 60 * 60 * 24));
+          currentPlanEl.textContent = `Free Trial (${daysLeft}d left)`;
+          currentPlanEl.style.color = 'var(--blue-primary)';
+          currentPlanEl.style.borderColor = 'rgba(59, 130, 246, 0.4)';
+          currentPlanEl.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+        }
+      }
+
+      if (!showTrial) {
+        currentPlanEl.textContent = `${user.subscriptionPlan} Plan`;
+
+        // Color code by tier
+        if (user.subscriptionPlan === 'premium') {
+          currentPlanEl.style.color = '#10b981'; // Green
+          currentPlanEl.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+          currentPlanEl.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+        } else if (user.subscriptionPlan === 'advance') {
+          currentPlanEl.style.color = 'var(--blue-primary)';
+          currentPlanEl.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+          currentPlanEl.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+        } else {
+          currentPlanEl.style.color = 'var(--text-secondary)';
+          currentPlanEl.style.borderColor = 'var(--border)';
+          currentPlanEl.style.backgroundColor = 'var(--bg-surface)';
+        }
+      }
+    }
+
     const usageQuotaEl = document.getElementById('usageQuotaEl');
     if (usageQuotaEl && user.usage) {
       let dailyLimit = 300; let monthlyLimit = 9000;
@@ -82,6 +120,11 @@ async function checkAuth() {
     loadCountries();
     loadHistory();
     startQueuePolling();
+
+    // Populate the Profile Modal with live session data
+    if (typeof window.populateProfileModal === 'function') {
+      window.populateProfileModal(user);
+    }
 
     // Apply UI locks based on subscription plan
     applySubscriptionLocks(user.subscriptionPlan);
@@ -572,9 +615,9 @@ document.getElementById("expandNiches")?.addEventListener("click", async () => {
 document.getElementById("run")?.addEventListener("click", async () => {
   const niches = nichesEl.value.split("\n").map((x) => x.trim()).filter(Boolean);
   const states = selectedValues(stateContainer);
-  const cities = selectedValues(cityContainer);
   const includeGoogleMaps = (googleMapsModeEl?.value || "yes") === "yes";
   const scrapeMode = getScrapeMode();
+  const country = countryEl.value;
 
   const allSites = ["facebook.com", "instagram.com", "linkedin.com/in", "twitter.com", "reddit.com"];
   let sites = [...allSites];
@@ -586,17 +629,50 @@ document.getElementById("run")?.addEventListener("click", async () => {
   if (smLeaveItEl && !smLeaveItEl.checked) {
     const selectedSites = Array.from(document.querySelectorAll(".sm-site:checked")).map(el => el.value);
     if (selectedSites.length > 0) {
-      // Prioritize selected sites: put them first, then the remaining ones
       sites = [...selectedSites, ...allSites.filter(s => !selectedSites.includes(s))];
     }
   }
 
-  if (!niches.length || !cities.length) {
+  if (!niches.length || !states.length) {
     if (runErrorBox) {
-      runErrorBox.innerHTML = "<strong>Missing Fields:</strong><br>Please select at least one niche and one city before starting.";
+      runErrorBox.innerHTML = "<strong>Missing Fields:</strong><br>Please enter at least one niche and select at least one State / Region before starting.";
       runErrorBox.style.display = "block";
     }
-    setStatus("Select at least one niche and one city.", 'error');
+    setStatus("Select at least one niche and one state.", 'error');
+    return;
+  }
+
+  // === Auto-resolve all cities for the selected states ===
+  statusEl.textContent = "Resolving cities for selected states…";
+  let cities = [];
+  try {
+    const cityFetches = states.map(state =>
+      fetchJson(`/api/location?country=${encodeURIComponent(country)}&state=${encodeURIComponent(state)}`)
+        .then(d => d.cities || [])
+        .catch(() => [])
+    );
+    const results = await Promise.all(cityFetches);
+    cities = [...new Set(results.flat())];
+  } catch (err) {
+    console.warn("Could not auto-resolve cities, falling back to country-wide list.", err);
+  }
+
+  // Fallback: if state-level cities are empty, use all country cities
+  if (!cities.length) {
+    try {
+      const details = await fetchJson(`/api/location?country=${encodeURIComponent(country)}`);
+      cities = details.cities || [];
+    } catch (err) {
+      console.warn("Fallback city fetch also failed.", err);
+    }
+  }
+
+  if (!cities.length) {
+    if (runErrorBox) {
+      runErrorBox.innerHTML = "<strong>No cities found:</strong><br>Could not resolve any cities for the selected states. Please try a different state or country.";
+      runErrorBox.style.display = "block";
+    }
+    setStatus("No cities resolved for selected states.", 'error');
     return;
   }
 
@@ -609,7 +685,7 @@ document.getElementById("run")?.addEventListener("click", async () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        country: countryEl.value,
+        country,
         states,
         cities,
         niches,
@@ -841,6 +917,7 @@ checkAuth();
 // Load initial data
 loadCountries();
 loadCategories();
+
 startQueuePolling();
 
 export { fetchJson, checkAuth as checkAuthAndSetupSidebar };

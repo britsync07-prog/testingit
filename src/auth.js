@@ -64,7 +64,8 @@ export async function authenticate(username, password) {
       id: user.id,
       username: user.username,
       subscriptionPlan: activePlan,
-      email: user.email
+      email: user.email,
+      trialEndsAt: user.trialEndsAt
     };
   }
   return null;
@@ -95,6 +96,22 @@ export async function registerUser(username, email, password) {
   } catch (error) {
     console.error("[Auth] Registration error:", error);
     return { error: "Internal database error during registration." };
+  }
+}
+
+export async function changePassword(username, currentPassword, newPassword) {
+  const user = await authenticate(username, currentPassword);
+  if (!user) {
+    return { error: "Incorrect current password." };
+  }
+
+  try {
+    const hashedNew = await bcrypt.hash(newPassword, 10);
+    db.prepare("UPDATE users SET password = ? WHERE id = ?").run(hashedNew, user.id);
+    return { success: true };
+  } catch (error) {
+    console.error("[Auth] Password change error:", error);
+    return { error: "Database error while updating password." };
   }
 }
 

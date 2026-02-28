@@ -70,7 +70,7 @@
 
     <!-- Sticky Upgrade CTA -->
     <a href="/index.html#pricing"
-      class="flex items-center gap-2.5 px-3 py-2 mt-auto rounded-md font-bold transition-all text-white bg-gradient-to-r from-brand-500 to-accent-500 shadow-md hover:shadow-lg hover:-translate-y-0.5">
+      class="flex items-center gap-2.5 px-3 py-2 mt-auto rounded-md font-bold transition-all text-white bg-gradient-to-r from-blue-500 to-indigo-600 shadow-md hover:shadow-lg hover:-translate-y-0.5">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
         stroke-linecap="round" stroke-linejoin="round">
         <polygon
@@ -81,15 +81,20 @@
     </a>
   </nav>
   <div class="p-3 border-t flex flex-col gap-2 bg-slate-50 border-slate-200">
-    <div
-      class="flex items-center gap-2 px-3 py-2.5 bg-brand-base rounded-md border text-sm text-brand-secondary border-slate-200">
+    <!-- Profile Button -->
+    <button id="openProfileBtn"
+      class="flex items-center gap-2 px-3 py-2.5 bg-brand-base hover:bg-brand-hover rounded-md border text-sm text-brand-secondary border-slate-200 transition-all cursor-pointer w-full text-left">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
         stroke-linecap="round" stroke-linejoin="round" class="text-brand-primary shrink-0">
         <circle cx="12" cy="8" r="5"></circle>
         <path d="M20 21a8 8 0 1 0-16 0"></path>
       </svg>
       <span id="userInfo" class="truncate font-mono text-xs">Loading...</span>
-    </div>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        class="ml-auto shrink-0 text-brand-muted">
+        <path d="m9 18 6-6-6-6" />
+      </svg>
+    </button>
     <button id="logoutBtn"
       class="flex items-center justify-center gap-2 px-3 py-2 w-full text-sm font-medium text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all cursor-pointer border border-transparent hover:border-red-500/20">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -115,6 +120,10 @@
       <div id="queueStatus" class="queue-badge"></div>
     </div>
     <div class="flex items-center gap-3">
+      <!-- Explicit Plan Badge -->
+      <span id="currentPlanEl" class="hidden text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md border"
+        style="margin-right:4px;"></span>
+
       <span id="usageQuotaEl"
         style="display:none; font-size:12px; font-weight:600; padding:4px 8px; border-radius:4px; background:rgba(59,130,246,0.1); color:var(--blue-primary); margin-right:12px; white-space:nowrap;"></span>
       <div class="status-indicator" id="statusIndicator">
@@ -191,7 +200,7 @@ Gym Coach"
 
         <div class="location-section">
           <div class="section-header-row">
-            <span class="section-label">States / Regions <span class="badge-optional">optional</span></span>
+            <span class="section-label">States / Regions</span>
             <label class="check-all-label block text-xs font-semibold text-brand-muted mb-1.5 uppercase tracking-wide">
               <input type="checkbox" id="selectAllStates"> All
             </label>
@@ -199,7 +208,8 @@ Gym Coach"
           <div id="states" class="city-grid"></div>
         </div>
 
-        <div class="location-section">
+        <!-- Cities hidden: auto-scraped from selected states -->
+        <div class="location-section" style="display:none;">
           <div class="section-header-row">
             <span class="section-label">Cities</span>
             <label class="check-all-label block text-xs font-semibold text-brand-muted mb-1.5 uppercase tracking-wide">
@@ -352,6 +362,8 @@ Gym Coach"
         </div>
       </div>
 
+
+
       <!-- Error Box -->
       <div id="runErrorBox"
         style="display:none; background-color:#fee2e2; border:1px solid #f87171; color:#991b1b; padding:12px; border-radius:6px; margin-bottom:12px; font-size:13px; line-height:1.4;">
@@ -466,5 +478,250 @@ Gym Coach"
     </div>
   </div>
 </div>
+
+<!-- ========== PROFILE MODAL ========== -->
+<div id="profileModal"
+  style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(15,23,42,0.55); backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+  <div
+    style="background:#fff; border-radius:20px; width:100%; max-width:480px; margin:16px; box-shadow:0 25px 60px rgba(0,0,0,0.18); overflow:hidden; animation:slideUp 0.25s ease;">
+    <!-- Modal Header -->
+    <div style="padding:24px 24px 0; display:flex; align-items:center; justify-content:space-between;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div
+          style="width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,#6366f1,#8b5cf6); display:flex; align-items:center; justify-content:center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="5" />
+            <path d="M20 21a8 8 0 1 0-16 0" />
+          </svg>
+        </div>
+        <div>
+          <div style="font-size:17px; font-weight:700; color:#0f172a; line-height:1.2;" id="profileName">–</div>
+          <div style="font-size:12px; color:#94a3b8;" id="profileEmail">–</div>
+        </div>
+      </div>
+      <button id="closeProfileBtn"
+        style="background:none; border:none; cursor:pointer; padding:6px; color:#94a3b8; border-radius:8px; display:flex; align-items:center; transition:background 0.2s;"
+        onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6 6 18" />
+          <path d="m6 6 12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Account Summary Cards -->
+    <div style="padding:20px 24px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px;">
+        <div
+          style="font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.06em; margin-bottom:4px;">
+          Plan</div>
+        <div id="profilePlan" style="font-size:14px; font-weight:700; color:#6366f1;">–</div>
+      </div>
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px;">
+        <div
+          style="font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.06em; margin-bottom:4px;">
+          Status</div>
+        <div id="profileStatus" style="font-size:14px; font-weight:700; color:#10b981;">Active</div>
+      </div>
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px;">
+        <div
+          style="font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.06em; margin-bottom:4px;">
+          Today's Usage</div>
+        <div id="profileDailyUsage" style="font-size:14px; font-weight:700; color:#0f172a;">–</div>
+      </div>
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px;">
+        <div
+          style="font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.06em; margin-bottom:4px;">
+          Monthly Usage</div>
+        <div id="profileMonthlyUsage" style="font-size:14px; font-weight:700; color:#0f172a;">–</div>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div style="border-top:1px solid #f1f5f9; margin:0 24px;"></div>
+
+    <!-- Change Password Section -->
+    <div style="padding:20px 24px 24px;">
+      <div
+        style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:14px; display:flex; align-items:center; gap:7px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5">
+          <rect x="3" y="11" width="18" height="11" rx="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+        Change Password
+      </div>
+      <form id="changePasswordForm" style="display:flex; flex-direction:column; gap:12px;">
+        <div style="position:relative;">
+          <label
+            style="display:block; font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.06em; margin-bottom:5px;">Current
+            Password</label>
+          <input type="password" id="currentPassword" required
+            style="width:100%; box-sizing:border-box; padding:10px 44px 10px 14px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:13px; font-family:'Fira Code',monospace; background:#f8fafc; outline:none; transition:border-color .2s;"
+            onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e2e8f0'">
+          <button type="button" onclick="togglePwdVisibility('currentPassword','eyeOffCur','eyeOnCur')"
+            style="position:absolute; right:12px; bottom:10px; background:none; border:none; cursor:pointer; color:#94a3b8; padding:0; display:flex;">
+            <svg id="eyeOnCur" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            <svg id="eyeOffCur" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+              <path
+                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+              <line x1="1" y1="1" x2="23" y2="23" />
+            </svg>
+          </button>
+        </div>
+        <div style="position:relative;">
+          <label
+            style="display:block; font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.06em; margin-bottom:5px;">New
+            Password</label>
+          <input type="password" id="newPassword" required minlength="6"
+            style="width:100%; box-sizing:border-box; padding:10px 44px 10px 14px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:13px; font-family:'Fira Code',monospace; background:#f8fafc; outline:none; transition:border-color .2s;"
+            onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e2e8f0'">
+          <button type="button" onclick="togglePwdVisibility('newPassword','eyeOffNew','eyeOnNew')"
+            style="position:absolute; right:12px; bottom:10px; background:none; border:none; cursor:pointer; color:#94a3b8; padding:0; display:flex;">
+            <svg id="eyeOnNew" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            <svg id="eyeOffNew" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+              <path
+                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+              <line x1="1" y1="1" x2="23" y2="23" />
+            </svg>
+          </button>
+        </div>
+        <div id="passwordMessage"
+          style="display:none; font-size:12px; font-weight:600; padding:10px 12px; border-radius:8px;"></div>
+        <button type="submit" id="pwdSubmitBtn"
+          style="width:100%; padding:11px; background:linear-gradient(135deg,#6366f1,#4f46e5); color:#fff; border:none; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; transition:opacity .2s; letter-spacing:.02em;">
+          Update Password
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<script>
+  function togglePwdVisibility(inputId, eyeOffId, eyeOnId) {
+    const inp = document.getElementById(inputId);
+    const on = document.getElementById(eyeOnId);
+    const off = document.getElementById(eyeOffId);
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      on.style.display = 'none';
+      off.style.display = 'block';
+    } else {
+      inp.type = 'password';
+      on.style.display = 'block';
+      off.style.display = 'none';
+    }
+  }
+
+  // Profile modal open/close
+  const profileModal = document.getElementById('profileModal');
+  const openProfileBtn = document.getElementById('openProfileBtn');
+  const closeProfileBtn = document.getElementById('closeProfileBtn');
+
+  function openProfile() {
+    profileModal.style.display = 'flex';
+  }
+  function closeProfile() {
+    profileModal.style.display = 'none';
+    document.getElementById('changePasswordForm').reset();
+    const msgEl = document.getElementById('passwordMessage');
+    msgEl.style.display = 'none';
+    msgEl.textContent = '';
+  }
+
+  if (openProfileBtn) openProfileBtn.addEventListener('click', openProfile);
+  if (closeProfileBtn) closeProfileBtn.addEventListener('click', closeProfile);
+  profileModal.addEventListener('click', (e) => { if (e.target === profileModal) closeProfile(); });
+
+  // Expose a function so app.js can populate the profile data
+  window.populateProfileModal = function (user) {
+    document.getElementById('profileName').textContent = user.username || '–';
+    document.getElementById('profileEmail').textContent = user.email || 'No email on record';
+
+    const isTrialing = user.trialEndsAt && new Date(user.trialEndsAt) > new Date();
+    let planLabel = user.subscriptionPlan || '–';
+    if (isTrialing) {
+      const days = Math.ceil((new Date(user.trialEndsAt) - new Date()) / 86400000);
+      planLabel = `Free Trial · ${days}d left`;
+      document.getElementById('profilePlan').style.color = '#3b82f6';
+    } else if (user.subscriptionPlan === 'premium') {
+      document.getElementById('profilePlan').style.color = '#10b981';
+    } else {
+      document.getElementById('profilePlan').style.color = '#6366f1';
+    }
+    document.getElementById('profilePlan').textContent = planLabel.charAt(0).toUpperCase() + planLabel.slice(1);
+
+    const dailyLimit = user.subscriptionPlan === 'basic' ? 100 : 300;
+    const monthlyLimit = user.subscriptionPlan === 'basic' ? 3000 : 9000;
+    const d = user.usage?.dailyCount ?? 0;
+    const m = user.usage?.monthlyCount ?? 0;
+    document.getElementById('profileDailyUsage').textContent = `${d} / ${dailyLimit}`;
+    document.getElementById('profileMonthlyUsage').textContent = `${m} / ${monthlyLimit}`;
+  };
+
+  // Change Password form handler
+  const changePasswordForm = document.getElementById('changePasswordForm');
+  const msgEl = document.getElementById('passwordMessage');
+
+  changePasswordForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const btn = document.getElementById('pwdSubmitBtn');
+
+    msgEl.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'Updating…';
+
+    try {
+      const res = await fetch('/api/auth/password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+      const data = await res.json();
+
+      msgEl.style.display = 'block';
+      if (res.ok) {
+        msgEl.textContent = '✓ Password updated successfully!';
+        msgEl.style.cssText = 'display:block; font-size:12px; font-weight:600; padding:10px 12px; border-radius:8px; background:#ecfdf5; border:1px solid #6ee7b7; color:#065f46;';
+        changePasswordForm.reset();
+      } else {
+        msgEl.textContent = data.error || 'Failed to update password.';
+        msgEl.style.cssText = 'display:block; font-size:12px; font-weight:600; padding:10px 12px; border-radius:8px; background:#fef2f2; border:1px solid #fca5a5; color:#991b1b;';
+      }
+    } catch {
+      msgEl.textContent = 'Network error. Please try again.';
+      msgEl.style.cssText = 'display:block; font-size:12px; font-weight:600; padding:10px 12px; border-radius:8px; background:#fef2f2; border:1px solid #fca5a5; color:#991b1b;';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Update Password';
+    }
+  });
+</script>
 
 <script type="module" src="app.js"></script>

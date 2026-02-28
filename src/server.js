@@ -9,7 +9,7 @@ import sessionFileStore from "session-file-store";
 import validator from "html-validator";
 import juice from "juice";
 import rateLimit from "express-rate-limit"; // Security
-import { authenticate, requireAuth, registerUser } from "./auth.js";
+import { authenticate, requireAuth, registerUser, changePassword } from "./auth.js";
 import { JobQueue } from "./queue.js";
 import { expandNiches } from "./scraper.js";
 
@@ -139,16 +139,55 @@ app.post("/api/auth/register", async (req, res) => {
   return res.status(500).json({ error: "Signup successful but auto-login failed." });
 });
 
+app.post("/api/auth/password", requireAuth, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  const result = await changePassword(req.session.user.username, currentPassword, newPassword);
+  if (result.error) {
+    return res.status(400).json({ error: result.error });
+  }
+
+  return res.json({ success: true });
+});
+
 app.get("/api/checkout/session", requireAuth, async (req, res) => {
   const { plan } = req.query;
-  const user = req.session.user;
+  const sessionUser = req.session.user;
 
   if (!['basic', 'advance', 'premium'].includes(plan)) {
     return res.status(400).json({ error: "Invalid subscription plan selected." });
   }
 
+  // Fetch fresh user data from DB to check current tier and trial status
+  const user = db.prepare("SELECT id, email, subscriptionPlan, trialEndsAt FROM users WHERE id = ?").get(sessionUser.id);
+
+  // Prevent duplicate purchases or downgrades
+  // Tiers logic: free (0) -> basic (1) -> advance (2) -> premium (3)
+  const tiers = { free: 0, basic: 1, advance: 2, premium: 3 };
+  const currentTier = tiers[user.subscriptionPlan] || 0;
+  const targetTier = tiers[plan];
+
+  // If trialEndsAt is NULL, the user has a *paid* plan.
+  // We block the purchase if they are trying to buy the same or a lower tier.
+  if (!user.trialEndsAt && targetTier <= currentTier && currentTier > 0) {
+    // Generate a sleek error page instead of raw JSON so the user isn't stuck
+    return res.send(`
+      <html><body style="font-family: sans-serif; text-align: center; padding: 50px;">
+        <h2>Oops! Invalid Upgrade</h2>
+        <p>You already have the <b>${user.subscriptionPlan.toUpperCase()}</b> plan.</p>
+        <p>You cannot purchase or downgrade to <b>${plan.toUpperCase()}</b>.</p>
+        <a href="/dashboard.html" style="color: blue;">Return to Dashboard</a>
+      </body></html>
+    `);
+  }
+
   try {
-    const session = await stripe.checkout.sessions.create({
+    const domain = `${req.protocol}://${req.get('host')}`;
+
+    const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
         {
@@ -164,13 +203,13 @@ app.get("/api/checkout/session", requireAuth, async (req, res) => {
         },
       ],
       mode: "payment", // Simplification to avoid complex subscription prorations for now
-      success_url: `http://${HOST}:${PORT}/dashboard.html?checkout=success`,
-      cancel_url: `http://${HOST}:${PORT}/index.html`,
+      success_url: `${domain}/dashboard.html?checkout=success`,
+      cancel_url: `${domain}/index.html`,
       client_reference_id: user.id, // Used by the Webhook to unlock the user's account
       customer_email: user.email // Pre-fill Stripe Form
     });
 
-    res.redirect(303, session.url);
+    res.redirect(303, checkoutSession.url);
   } catch (error) {
     console.error("[Stripe Session Error]:", error);
     res.status(500).json({ error: "Failed to generate secure checkout portal." });
@@ -208,7 +247,9 @@ app.get("/api/me", (req, res) => {
 
     return res.json({
       username: req.session.user.username,
+      email: req.session.user.email,
       subscriptionPlan: req.session.user.subscriptionPlan,
+      trialEndsAt: req.session.user.trialEndsAt,
       usage: usage,
       activeJobId: activeJob ? activeJob.id : null
     });
@@ -277,6 +318,28 @@ async function getCountryDetails(country) {
   return details;
 }
 
+// Cache for per-state city lookups
+const stateCityCache = new Map();
+
+async function getCitiesForState(country, state) {
+  const cacheKey = `${country}::${state}`;
+  if (stateCityCache.has(cacheKey)) return stateCityCache.get(cacheKey);
+
+  try {
+    const payload = await fetchJson(`${COUNTRY_API}/countries/state/cities`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ country, state })
+    });
+    const cities = (payload.data || []).filter(Boolean).sort((a, b) => a.localeCompare(b));
+    stateCityCache.set(cacheKey, cities);
+    return cities;
+  } catch (err) {
+    console.warn(`[Location] State city lookup failed for ${state}, ${country}:`, err.message);
+    return [];
+  }
+}
+
 // --- API ROUTES ---
 
 const checkerCallbacks = new Map();
@@ -317,11 +380,19 @@ app.get("/api/metadata", requireAuth, async (_req, res) => {
 
 app.get("/api/location", requireAuth, async (req, res) => {
   const country = req.query.country;
+  const state = req.query.state;
+
   if (!country || typeof country !== "string") {
     return res.status(400).json({ error: "country query param is required" });
   }
 
   try {
+    // If a specific state is requested, return only the cities for that state
+    if (state && typeof state === "string") {
+      const cities = await getCitiesForState(country, state);
+      return res.json({ country, state, cities });
+    }
+
     const details = await getCountryDetails(country);
     return res.json({ ...details, source: COUNTRY_API, country });
   } catch (error) {
