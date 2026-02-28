@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LeadHunter — Sign Up</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="tailwind-config.js"></script>
+
+    <!-- Auto-redirect if already logged in -->
+    <script>
+        fetch('/api/me').then(res => {
+            if (res.ok) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const requestedPlan = urlParams.get('plan');
+                if (requestedPlan) {
+                    window.location.replace(`/api/checkout/session?plan=${requestedPlan}`);
+                } else {
+                    window.location.replace('/dashboard.html');
+                }
+            }
+        }).catch(() => { });
+    </script>
+</head>
+
+<body
+    class="bg-brand-base flex items-center justify-center min-h-screen text-brand-text font-sans antialiased relative overflow-hidden">
+    <!-- Fancy Background Mesh Gradients -->
+    <div
+        class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-400/20 rounded-full blur-[120px] mix-blend-multiply">
+    </div>
+    <div
+        class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-400/20 rounded-full blur-[120px] mix-blend-multiply">
+    </div>
+
+    <div class="w-full max-w-[420px] p-6 relative z-10">
+        <div class="flex items-center gap-3 justify-center mb-10 text-3xl font-bold text-brand-text tracking-tight">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round" class="text-brand-primary drop-shadow-sm">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+                <path d="M11 8v6M8 11h6" />
+            </svg>
+            LeadHunter
+        </div>
+
+        <!-- Glassmorphism Card Wrapper -->
+        <div
+            class="bg-white/90 backdrop-blur-2xl border border-white/40 rounded-2xl p-8 shadow-[0_8px_40px_rgba(31,38,135,0.08)]">
+            <div class="text-center mb-8">
+                <div class="text-2xl font-bold text-brand-text tracking-tight mb-2">Create an account</div>
+                <div class="text-sm font-medium text-brand-secondary">Start your free 3-day premium trial instantly
+                </div>
+            </div>
+
+            <form id="signupForm">
+                <div class="mb-5">
+                    <label for="username"
+                        class="block text-xs font-bold text-brand-secondary mb-2 tracking-wide uppercase">Username</label>
+                    <input type="text" id="username" name="username"
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-brand-text font-mono focus:bg-white focus:outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition-all duration-300 shadow-inner"
+                        placeholder="johndoe" required autocomplete="username" />
+                </div>
+
+                <div class="mb-5">
+                    <label for="email"
+                        class="block text-xs font-bold text-brand-secondary mb-2 tracking-wide uppercase">Email
+                        Address</label>
+                    <input type="email" id="email" name="email"
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-brand-text font-mono focus:bg-white focus:outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition-all duration-300 shadow-inner"
+                        placeholder="john@example.com" required autocomplete="email" />
+                </div>
+
+                <div class="mb-8 relative">
+                    <label for="password"
+                        class="block text-xs font-bold text-brand-secondary mb-2 tracking-wide uppercase">Password</label>
+                    <div class="relative">
+                        <input type="password" id="password" name="password"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-brand-text font-mono focus:bg-white focus:outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition-all duration-300 shadow-inner pr-12"
+                            placeholder="••••••••" required autocomplete="new-password" />
+                        <button type="button" id="togglePassword"
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-brand-primary cursor-pointer transition-colors duration-200">
+                            <!-- Eye Off Icon (default hidden) -->
+                            <svg id="eyeOffIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" class="hidden">
+                                <path
+                                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                                </path>
+                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                            </svg>
+                            <!-- Eye Icon (default showing) -->
+                            <svg id="eyeOnIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit"
+                    class="w-full py-3.5 bg-brand-primary hover:bg-brand-primary/90 text-white rounded-xl text-sm font-bold tracking-wide transition-all duration-300 flex items-center justify-center shadow-[0_4px_14px_rgba(99,102,241,0.39)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.23)] hover:-translate-y-0.5 cursor-pointer">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round" class="mr-2.5">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <line x1="19" y1="8" x2="19" y2="14"></line>
+                        <line x1="22" y1="11" x2="16" y2="11"></line>
+                    </svg>
+                    Sign Up
+                </button>
+            </form>
+
+            <div id="error"
+                class="hidden mt-6 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm font-medium shadow-sm">
+            </div>
+
+            <div class="mt-6 text-center text-sm font-medium text-brand-secondary">
+                Already have an account? <a href="/login.html" class="text-brand-primary font-bold hover:underline">Sign
+                    in</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const toggleBtn = document.getElementById("togglePassword");
+        const pwdInput = document.getElementById("password");
+        const eyeOn = document.getElementById("eyeOnIcon");
+        const eyeOff = document.getElementById("eyeOffIcon");
+
+        toggleBtn.addEventListener('click', () => {
+            const type = pwdInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            pwdInput.setAttribute('type', type);
+            eyeOn.classList.toggle('hidden');
+            eyeOff.classList.toggle('hidden');
+        });
+
+        document.getElementById("signupForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Processing...';
+
+            const username = e.target.username.value;
+            const email = e.target.email.value;
+            const password = e.target.password.value;
+            const errorDiv = document.getElementById("error");
+
+            errorDiv.classList.add('hidden');
+            errorDiv.textContent = '';
+
+            try {
+                const response = await fetch("/api/auth/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                if (response.ok) {
+                    // If the user clicked a link with a plan parameter (e.g. ?plan=advance) from index.html
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const requestedPlan = urlParams.get('plan');
+
+                    if (requestedPlan) {
+                        // Send user to server to generate Stripe Checkout URL
+                        window.location.href = `/api/checkout/session?plan=${requestedPlan}`;
+                    } else {
+                        // Fallback to free 3-day premium dashboard
+                        window.location.href = "/dashboard.html";
+                    }
+                } else {
+                    const result = await response.json();
+                    errorDiv.innerHTML = `<strong>Registration Failed</strong><br/>${result.error || "Please try again."}`;
+                    errorDiv.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round" class="mr-2.5">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <line x1="19" y1="8" x2="19" y2="14"></line>
+              <line x1="22" y1="11" x2="16" y2="11"></line>
+            </svg>
+            Sign Up
+          `;
+                }
+            } catch (error) {
+                errorDiv.innerHTML = `<strong>Network Error</strong><br/>Secure connection lost.`;
+                errorDiv.classList.remove('hidden');
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

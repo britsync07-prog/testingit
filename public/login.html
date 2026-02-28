@@ -14,6 +14,13 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="tailwind-config.js"></script>
+
+  <!-- Auto-redirect if already logged in -->
+  <script>
+    fetch('/api/me').then(res => {
+      if (res.ok) window.location.replace('/dashboard.html');
+    }).catch(() => { });
+  </script>
 </head>
 
 <body
@@ -54,12 +61,32 @@
             placeholder="admin" required autocomplete="username" />
         </div>
 
-        <div class="mb-5">
+        <div class="mb-5 relative">
           <label for="password"
             class="block text-xs font-bold text-brand-secondary mb-2 tracking-wide uppercase">Password</label>
-          <input type="password" id="password" name="password"
-            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-brand-text font-mono focus:bg-white focus:outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition-all duration-300 shadow-inner"
-            placeholder="••••••••" required autocomplete="current-password" />
+          <div class="relative">
+            <input type="password" id="password" name="password"
+              class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-brand-text font-mono focus:bg-white focus:outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition-all duration-300 shadow-inner pr-12"
+              placeholder="••••••••" required autocomplete="current-password" />
+            <button type="button" id="togglePassword"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-brand-primary cursor-pointer transition-colors duration-200">
+              <!-- Eye Off Icon (default hidden) -->
+              <svg id="eyeOffIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="hidden">
+                <path
+                  d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                </path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+              <!-- Eye Icon (default showing) -->
+              <svg id="eyeOnIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div class="flex items-center gap-2 mt-2 mb-8">
@@ -84,9 +111,24 @@
       <div id="error"
         class="hidden mt-6 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm font-medium shadow-sm">
       </div>
+      <div class="mt-6 text-center text-sm font-medium text-brand-secondary">
+        Don't have an account? <a href="/signup.html" class="text-brand-primary font-bold hover:underline">Sign up for
+          free</a>
+      </div>
     </div>
   </div>
   <script>
+    const toggleBtn = document.getElementById("togglePassword");
+    const pwdInput = document.getElementById("password");
+    const eyeOn = document.getElementById("eyeOnIcon");
+    const eyeOff = document.getElementById("eyeOffIcon");
+
+    toggleBtn.addEventListener('click', () => {
+      const type = pwdInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      pwdInput.setAttribute('type', type);
+      eyeOn.classList.toggle('hidden');
+      eyeOff.classList.toggle('hidden');
+    });
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const username = e.target.username.value;

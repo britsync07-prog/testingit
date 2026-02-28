@@ -21,6 +21,20 @@ db.pragma('journal_mode = WAL');
 
 // Define the schemas
 const initDb = () => {
+  // Users Table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      username TEXT UNIQUE NOT NULL,
+      email TEXT UNIQUE,
+      password TEXT NOT NULL,
+      subscriptionPlan TEXT DEFAULT 'free', -- 'free', 'basic', 'advance', 'premium'
+      trialEndsAt DATETIME,
+      stripeCustomerId TEXT,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   // Campaigns Table
   db.exec(`
     CREATE TABLE IF NOT EXISTS campaigns (

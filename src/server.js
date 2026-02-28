@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import path from "node:path";
 import crypto from "node:crypto";
@@ -8,13 +9,17 @@ import sessionFileStore from "session-file-store";
 import validator from "html-validator";
 import juice from "juice";
 import rateLimit from "express-rate-limit"; // Security
-import { authenticate, requireAuth } from "./auth.js";
+import { authenticate, requireAuth, registerUser } from "./auth.js";
 import { JobQueue } from "./queue.js";
 import { expandNiches } from "./scraper.js";
 
 // Sender & Tracking Routes
 import trackingRoutes from "./sender/routes/trackingRoutes.js";
 import apiRoutes from "./sender/routes/apiRoutes.js";
+import db from "./sender/models/db.js";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_dummy");
 
 const FileStore = sessionFileStore(session);
 const __filename = fileURLToPath(import.meta.url);
@@ -33,6 +38,39 @@ const sessionsDir = path.join(__dirname, "..", "data", "sessions");
 if (!fs.existsSync(sessionsDir)) {
   fs.mkdirSync(sessionsDir, { recursive: true });
 }
+
+// --- STRIPE WEBHOOK (Must be registered before express.json middleware) ---
+app.post("/api/webhooks/stripe", express.raw({ type: "application/json" }), (req, res) => {
+  let event;
+  try {
+    const sig = req.headers["stripe-signature"];
+    if (process.env.STRIPE_WEBHOOK_SECRET && sig) {
+      event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    } else {
+      // Insecure fallback for local dev without secrets
+      event = JSON.parse(req.body.toString());
+    }
+  } catch (err) {
+    console.error("[Stripe Webhook Error]:", err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object;
+    const userId = session.client_reference_id;
+
+    // Reverse-engineer the plan from the transaction amount
+    let plan = 'premium';
+    if (session.amount_total === 900) plan = 'basic';
+    if (session.amount_total === 2900) plan = 'advance';
+
+    if (userId) {
+      db.prepare("UPDATE users SET subscriptionPlan = ?, trialEndsAt = NULL WHERE id = ?").run(plan, userId);
+      console.log(`[Stripe Webhook] Upgraded user ${userId} to ${plan.toUpperCase()} plan via successful payment.`);
+    }
+  }
+  res.json({ received: true });
+});
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public")));
@@ -78,6 +116,66 @@ app.use("/track", trackingLimiter, trackingRoutes);
 app.use("/api/sender", requireAuth, apiRoutes);
 
 // --- AUTH ROUTES ---
+
+app.post("/api/auth/register", async (req, res) => {
+  const { username, email, password } = req.body;
+  if (!username || !email || !password) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  const result = await registerUser(username, email, password);
+  if (result.error) {
+    return res.status(400).json({ error: result.error });
+  }
+
+  // Instantly authenticate the new user session
+  const user = await authenticate(username, password);
+  if (user) {
+    req.session.user = user;
+    req.session.cookie.expires = false; // standard session
+    return res.json({ success: true, username: user.username });
+  }
+
+  return res.status(500).json({ error: "Signup successful but auto-login failed." });
+});
+
+app.get("/api/checkout/session", requireAuth, async (req, res) => {
+  const { plan } = req.query;
+  const user = req.session.user;
+
+  if (!['basic', 'advance', 'premium'].includes(plan)) {
+    return res.status(400).json({ error: "Invalid subscription plan selected." });
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: `LeadHunter ${plan.charAt(0).toUpperCase() + plan.slice(1)} Subscription`,
+              description: `Powerful ${plan} tier scraping platform.`,
+            },
+            unit_amount: plan === 'basic' ? 900 : plan === 'advance' ? 2900 : 4900,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "payment", // Simplification to avoid complex subscription prorations for now
+      success_url: `http://${HOST}:${PORT}/dashboard.html?checkout=success`,
+      cancel_url: `http://${HOST}:${PORT}/index.html`,
+      client_reference_id: user.id, // Used by the Webhook to unlock the user's account
+      customer_email: user.email // Pre-fill Stripe Form
+    });
+
+    res.redirect(303, session.url);
+  } catch (error) {
+    console.error("[Stripe Session Error]:", error);
+    res.status(500).json({ error: "Failed to generate secure checkout portal." });
+  }
+});
 
 app.post("/api/login", async (req, res) => {
   const { username, password, rememberMe } = req.body;

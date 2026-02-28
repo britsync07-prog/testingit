@@ -1,179 +1,218 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadHunter — Template Checker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link
+  href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&amp;family=Fira+Sans:wght@300;400;500;600;700&amp;display=swap"
+  rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="tailwind-config.js"></script>
 
 
 
 
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LeadHunter — Template Checker</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&amp;family=Fira+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="tailwind-config.js"></script>
-
-
-
-
-  <!-- Sidebar -->
-  <aside class="w-[220px] border-r flex flex-col fixed inset-y-0 left-0 z-50 bg-white/80 backdrop-blur-xl border-slate-200 shadow-[0_8px_32px_rgba(31,38,135,0.07)]">
-    <div class="flex items-center gap-3 p-5 pb-4 border-b text-brand-primary font-bold text-lg tracking-tight border-slate-200">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]">
-        <circle cx="11" cy="11" r="8"></circle>
-        <path d="m21 21-4.35-4.35"></path>
-        <path d="M11 8v6M8 11h6"></path>
+<!-- Sidebar -->
+<aside
+  class="w-[220px] border-r flex flex-col fixed inset-y-0 left-0 z-50 bg-white/80 backdrop-blur-xl border-slate-200 shadow-[0_8px_32px_rgba(31,38,135,0.07)]">
+  <div
+    class="flex items-center gap-3 p-5 pb-4 border-b text-brand-primary font-bold text-lg tracking-tight border-slate-200">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round" class="shrink-0 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]">
+      <circle cx="11" cy="11" r="8"></circle>
+      <path d="m21 21-4.35-4.35"></path>
+      <path d="M11 8v6M8 11h6"></path>
+    </svg>
+    <span>LeadHunter</span>
+  </div>
+  <nav class="flex-1 p-3 flex flex-col gap-1.5 overflow-y-auto">
+    <a href="/dashboard.html"
+      class="flex items-center gap-2.5 px-3 py-2 rounded-md font-medium transition-all text-brand-secondary hover:bg-brand-hover hover:text-brand-text border border-transparent">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+        <path d="M8 21h8M12 17v4"></path>
       </svg>
-      <span>LeadHunter</span>
+      Scraper
+    </a>
+    <a href="/sender.html" id="navSender"
+      class="flex items-center gap-2.5 px-3 py-2 rounded-md font-medium transition-all text-brand-secondary hover:bg-brand-hover hover:text-brand-text border border-transparent">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="m22 2-7 20-4-9-9-4Z"></path>
+        <path d="M22 2 11 13"></path>
+      </svg>
+      Sender
+    </a>
+    <a href="/categories.html"
+      class="flex items-center gap-2.5 px-3 py-2 rounded-md font-medium transition-all text-brand-secondary hover:bg-brand-hover hover:text-brand-text border border-transparent">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+      </svg>
+      Categories
+    </a>
+    <a href="/checker.html" id="navChecker"
+      class="flex items-center gap-2.5 px-3 py-2 rounded-md font-medium transition-all bg-brand-primary/10 text-brand-primary border border-brand-primary/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] cursor-default">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 12l2 2 4-4"></path>
+        <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path>
+        <path d="M3 12c1 0 3-1 3-3S4 6 3 6 0 7 0 9s2 3 3 3"></path>
+        <path d="M12 3c0 1-1 3-3 3S6 4 6 3s1-3 3-3 3 2 3 3"></path>
+        <path d="M12 21c0-1-1-3-3-3s-3 1-3 3 1 3 3 3 3-2 3-3"></path>
+      </svg>
+      Checker
+    </a>
+
+    <!-- Sticky Upgrade CTA -->
+    <a href="/index.html#pricing"
+      class="flex items-center gap-2.5 px-3 py-2 mt-auto mb-2 rounded-md font-bold transition-all text-white bg-gradient-to-r from-brand-500 to-accent-500 shadow-md hover:shadow-lg hover:-translate-y-0.5 border border-transparent">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+        stroke-linecap="round" stroke-linejoin="round">
+        <polygon
+          points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+        </polygon>
+      </svg>
+      Pro Plans
+    </a>
+  </nav>
+  <div class="p-3 border-t flex flex-col gap-2 bg-slate-50 border-slate-200">
+    <div
+      class="flex items-center gap-2 px-3 py-2.5 bg-brand-base rounded-md border text-sm text-brand-secondary border-slate-200">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="text-brand-primary shrink-0">
+        <circle cx="12" cy="8" r="5"></circle>
+        <path d="M20 21a8 8 0 1 0-16 0"></path>
+      </svg>
+      <span id="userInfo" class="truncate font-mono text-xs">Loading...</span>
     </div>
-    <nav class="flex-1 p-3 flex flex-col gap-1.5 overflow-y-auto">
-      <a href="/dashboard.html" class="flex items-center gap-2.5 px-3 py-2 rounded-md font-medium transition-all text-brand-secondary hover:bg-brand-hover hover:text-brand-text border border-transparent">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="3" width="20" height="14" rx="2"></rect>
-          <path d="M8 21h8M12 17v4"></path>
-        </svg>
-        Scraper
-      </a>
-      <a href="/sender.html" id="navSender" class="flex items-center gap-2.5 px-3 py-2 rounded-md font-medium transition-all text-brand-secondary hover:bg-brand-hover hover:text-brand-text border border-transparent">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="m22 2-7 20-4-9-9-4Z"></path>
-          <path d="M22 2 11 13"></path>
-        </svg>
-        Sender
-      </a>
-      <a href="/categories.html" class="flex items-center gap-2.5 px-3 py-2 rounded-md font-medium transition-all text-brand-secondary hover:bg-brand-hover hover:text-brand-text border border-transparent">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
-        </svg>
-        Categories
-      </a>
-      <a href="/checker.html" id="navChecker" class="flex items-center gap-2.5 px-3 py-2 rounded-md font-medium transition-all bg-brand-primary/10 text-brand-primary border border-brand-primary/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] cursor-default">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 12l2 2 4-4"></path>
-          <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path>
-          <path d="M3 12c1 0 3-1 3-3S4 6 3 6 0 7 0 9s2 3 3 3"></path>
-          <path d="M12 3c0 1-1 3-3 3S6 4 6 3s1-3 3-3 3 2 3 3"></path>
-          <path d="M12 21c0-1-1-3-3-3s-3 1-3 3 1 3 3 3 3-2 3-3"></path>
-        </svg>
-        Checker
-      </a>
-    </nav>
-    <div class="p-3 border-t flex flex-col gap-2 bg-slate-50 border-slate-200">
-      <div class="flex items-center gap-2 px-3 py-2.5 bg-brand-base rounded-md border text-sm text-brand-secondary border-slate-200">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-primary shrink-0">
-          <circle cx="12" cy="8" r="5"></circle>
-          <path d="M20 21a8 8 0 1 0-16 0"></path>
-        </svg>
-        <span id="userInfo" class="truncate font-mono text-xs">Loading...</span>
-      </div>
-      <button id="logoutBtn" class="flex items-center justify-center gap-2 px-3 py-2 w-full text-sm font-medium text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all cursor-pointer border border-transparent hover:border-red-500/20">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-          <polyline points="16 17 21 12 16 7"></polyline>
-          <line x1="21" y1="12" x2="9" y2="12"></line>
-        </svg>
-        Logout
-      </button>
+    <button id="logoutBtn"
+      class="flex items-center justify-center gap-2 px-3 py-2 w-full text-sm font-medium text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all cursor-pointer border border-transparent hover:border-red-500/20">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+        <polyline points="16 17 21 12 16 7"></polyline>
+        <line x1="21" y1="12" x2="9" y2="12"></line>
+      </svg>
+      Logout
+    </button>
+  </div>
+</aside>
+
+<!-- Main Content Wrapper -->
+<div class="ml-[220px] flex-1 flex flex-col min-h-screen">
+
+  <!-- Topbar -->
+  <header
+    class="h-[64px] backdrop-blur-md border-b flex items-center justify-between px-6 sticky top-0 z-40 bg-white/70 backdrop-blur-xl border-slate-200 shadow-sm">
+    <div class="flex items-center gap-4">
+      <h1 class="text-xl font-semibold text-brand-text tracking-tight">Template Checker</h1>
     </div>
-  </aside>
+    <div>
+      <span id="usageQuotaEl"
+        class="hidden text-xs w-auto font-semibold px-2.5 py-1 rounded-md bg-brand-primary/10 text-brand-primary border border-brand-primary/20 mr-3"></span>
+    </div>
+  </header>
 
-  <!-- Main Content Wrapper -->
-  <div class="ml-[220px] flex-1 flex flex-col min-h-screen">
+  <!-- Content Area -->
+  <div class="p-6 flex-1 overflow-y-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full max-w-7xl mx-auto">
 
-    <!-- Topbar -->
-    <header class="h-[64px] backdrop-blur-md border-b flex items-center justify-between px-6 sticky top-0 z-40 bg-white/70 backdrop-blur-xl border-slate-200 shadow-sm">
-      <div class="flex items-center gap-4">
-        <h1 class="text-xl font-semibold text-brand-text tracking-tight">Template Checker</h1>
-      </div>
-      <div>
-        <span id="usageQuotaEl" class="hidden text-xs w-auto font-semibold px-2.5 py-1 rounded-md bg-brand-primary/10 text-brand-primary border border-brand-primary/20 mr-3"></span>
-      </div>
-    </header>
-
-    <!-- Content Area -->
-    <div class="p-6 flex-1 overflow-y-auto">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full max-w-7xl mx-auto">
-
-        <!-- LEFT COLUMN: Input -->
-        <div class="border rounded-xl overflow-hidden h-fit flex flex-col">
-          <div class="px-5 py-4 border-b flex items-center gap-2.5 bg-slate-50/80 border-slate-200">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="text-brand-primary">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-              <polyline points="10 9 9 9 8 9"></polyline>
-            </svg>
-            <h2 class="font-semibold text-brand-text">Paste Your HTML Template</h2>
-          </div>
-
-          <div class="p-5 flex flex-col gap-4">
-            <div>
-              <label for="testEmail" class="block text-xs font-semibold text-brand-muted mb-1.5 uppercase tracking-wide">
-                Test Email
-                <span class="inline-flex items-center justify-center px-1.5 py-0.5 ml-1.5 rounded text-[10px] font-medium bg-brand-border text-brand-secondary lowercase tracking-normal">optional
-                  - sends a test</span>
-              </label>
-              <input type="email" id="testEmail" placeholder="your@email.com" class="w-full px-3 py-2.5 border rounded-md text-sm text-brand-text font-mono focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/50 transition-all placeholder:text-brand-border border-slate-200 bg-white shadow-sm">
-            </div>
-
-            <div>
-              <label for="subject" class="block text-xs font-semibold text-brand-muted mb-1.5 uppercase tracking-wide">
-                Email Subject
-                <span class="inline-flex items-center justify-center px-1.5 py-0.5 ml-1.5 rounded text-[10px] font-medium bg-brand-border text-brand-secondary lowercase tracking-normal">optional</span>
-              </label>
-              <input type="text" id="subject" placeholder="Enter email subject" class="w-full px-3 py-2.5 border rounded-md text-sm text-brand-text font-mono focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/50 transition-all placeholder:text-brand-border border-slate-200 bg-white shadow-sm">
-            </div>
-
-            <div class="flex-1 flex flex-col">
-              <label for="templateInput" class="block text-xs font-semibold text-brand-muted mb-1.5 uppercase tracking-wide">HTML
-                Template</label>
-              <textarea id="templateInput" rows="12" class="w-full px-3 py-2.5 bg-[#020617] border rounded-md text-xs text-brand-code font-mono focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/50 transition-all placeholder:text-brand-border leading-relaxed resize-y border-slate-200 bg-white shadow-sm" placeholder="<html><body><h1>Hello</h1></body></html>"></textarea>
-            </div>
-
-            <button id="checkTemplate" class="mt-2 w-full py-2.5 bg-brand-primary hover:bg-blue-600 text-white rounded-md text-sm font-semibold transition-all duration-200 flex items-center justify-center shadow-glow cursor-pointer">
-              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="mr-2">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-              </svg>
-              Check &amp; Send Test
-            </button>
-          </div>
+      <!-- LEFT COLUMN: Input -->
+      <div class="border rounded-xl overflow-hidden h-fit flex flex-col">
+        <div class="px-5 py-4 border-b flex items-center gap-2.5 bg-slate-50/80 border-slate-200">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+            class="text-brand-primary">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          <h2 class="font-semibold text-brand-text">Paste Your HTML Template</h2>
         </div>
 
-        <!-- RIGHT COLUMN: Results -->
-        <div id="resultPanel" class="hidden border border-brand-primary rounded-xl shadow-glow overflow-hidden h-fit flex-col ring-1 ring-brand-primary/20 bg-white">
-          <div class="px-5 py-4 border-b flex items-center gap-2.5 border-slate-200 bg-white">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="text-brand-primary">
-              <polyline points="9 11 12 14 22 4"></polyline>
-              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+        <div class="p-5 flex flex-col gap-4">
+          <div>
+            <label for="testEmail" class="block text-xs font-semibold text-brand-muted mb-1.5 uppercase tracking-wide">
+              Test Email
+              <span
+                class="inline-flex items-center justify-center px-1.5 py-0.5 ml-1.5 rounded text-[10px] font-medium bg-brand-border text-brand-secondary lowercase tracking-normal">optional
+                - sends a test</span>
+            </label>
+            <input type="email" id="testEmail" placeholder="your@email.com"
+              class="w-full px-3 py-2.5 border rounded-md text-sm text-brand-text font-mono focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/50 transition-all placeholder:text-brand-border border-slate-200 bg-white shadow-sm">
+          </div>
+
+          <div>
+            <label for="subject" class="block text-xs font-semibold text-brand-muted mb-1.5 uppercase tracking-wide">
+              Email Subject
+              <span
+                class="inline-flex items-center justify-center px-1.5 py-0.5 ml-1.5 rounded text-[10px] font-medium bg-brand-border text-brand-secondary lowercase tracking-normal">optional</span>
+            </label>
+            <input type="text" id="subject" placeholder="Enter email subject"
+              class="w-full px-3 py-2.5 border rounded-md text-sm text-brand-text font-mono focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/50 transition-all placeholder:text-brand-border border-slate-200 bg-white shadow-sm">
+          </div>
+
+          <div class="flex-1 flex flex-col">
+            <label for="templateInput"
+              class="block text-xs font-semibold text-brand-muted mb-1.5 uppercase tracking-wide">HTML
+              Template</label>
+            <textarea id="templateInput" rows="12"
+              class="w-full px-3 py-2.5 bg-[#020617] border rounded-md text-xs text-brand-code font-mono focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/50 transition-all placeholder:text-brand-border leading-relaxed resize-y border-slate-200 bg-white shadow-sm"
+              placeholder="<html><body><h1>Hello</h1></body></html>"></textarea>
+          </div>
+
+          <button id="checkTemplate"
+            class="mt-2 w-full py-2.5 bg-brand-primary hover:bg-blue-600 text-white rounded-md text-sm font-semibold transition-all duration-200 flex items-center justify-center shadow-glow cursor-pointer">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+              class="mr-2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
             </svg>
-            <h2 class="font-semibold text-brand-text">Validation Results</h2>
-          </div>
+            Check &amp; Send Test
+          </button>
+        </div>
+      </div>
 
-          <div class="p-5 flex flex-col gap-5">
-            <div class="flex flex-col sm:flex-row gap-4">
-              <div id="checkResult" class="flex-1 text-center py-4 px-3 rounded-lg font-semibold text-sm bg-brand-base border flex items-center justify-center flex-col gap-1 shadow-inner border-slate-200">
-                <!-- Inner HTML injected by JS -->
-              </div>
-              <div id="spamScore" class="flex-1 text-center py-4 px-3 rounded-lg font-semibold text-sm bg-brand-base border flex items-center justify-center flex-col gap-1 shadow-inner border-slate-200">
-                <!-- Inner HTML injected by JS -->
-              </div>
-            </div>
-
-            <div>
-              <h4 class="text-sm font-semibold text-brand-text mb-3 border-b pb-1 border-slate-200">Issues Found:
-              </h4>
-              <ul id="findingsList" class="flex flex-col gap-2 m-0 p-0 list-none">
-                <!-- Inner HTML injected by JS -->
-              </ul>
-            </div>
-          </div>
+      <!-- RIGHT COLUMN: Results -->
+      <div id="resultPanel"
+        class="hidden border border-brand-primary rounded-xl shadow-glow overflow-hidden h-fit flex-col ring-1 ring-brand-primary/20 bg-white">
+        <div class="px-5 py-4 border-b flex items-center gap-2.5 border-slate-200 bg-white">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+            class="text-brand-primary">
+            <polyline points="9 11 12 14 22 4"></polyline>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+          <h2 class="font-semibold text-brand-text">Validation Results</h2>
         </div>
 
+        <div class="p-5 flex flex-col gap-5">
+          <div class="flex flex-col sm:flex-row gap-4">
+            <div id="checkResult"
+              class="flex-1 text-center py-4 px-3 rounded-lg font-semibold text-sm bg-brand-base border flex items-center justify-center flex-col gap-1 shadow-inner border-slate-200">
+              <!-- Inner HTML injected by JS -->
+            </div>
+            <div id="spamScore"
+              class="flex-1 text-center py-4 px-3 rounded-lg font-semibold text-sm bg-brand-base border flex items-center justify-center flex-col gap-1 shadow-inner border-slate-200">
+              <!-- Inner HTML injected by JS -->
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-sm font-semibold text-brand-text mb-3 border-b pb-1 border-slate-200">Issues Found:
+            </h4>
+            <ul id="findingsList" class="flex flex-col gap-2 m-0 p-0 list-none">
+              <!-- Inner HTML injected by JS -->
+            </ul>
+          </div>
+        </div>
       </div>
+
     </div>
   </div>
+</div>
 
-  <script type="module" src="checker.js"></script>
-
-
+<script type="module" src="checker.js"></script>
