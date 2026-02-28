@@ -245,6 +245,18 @@ app.get("/api/me", (req, res) => {
     );
     const usage = queue.getUserUsage(req.session.user.username);
 
+    // Always read plan & trial from DB so Stripe webhook changes are reflected immediately
+    // without requiring the user to log out and back in.
+    const freshUser = db.prepare("SELECT subscriptionPlan, trialEndsAt, email FROM users WHERE id = ?")
+      .get(req.session.user.id);
+
+    if (freshUser) {
+      // Keep session in sync so subsequent checks are consistent
+      req.session.user.subscriptionPlan = freshUser.subscriptionPlan;
+      req.session.user.trialEndsAt = freshUser.trialEndsAt;
+      req.session.user.email = freshUser.email;
+    }
+
     return res.json({
       username: req.session.user.username,
       email: req.session.user.email,
