@@ -69,6 +69,12 @@ async function checkAuth() {
     currentUser = user;
     userInfoEl.textContent = `Logged in as: ${user.username}`;
 
+    // Show Admin Panel link if user is an admin
+    if (user.isAdmin) {
+      const adminLink = document.getElementById('adminPanelLink');
+      if (adminLink) adminLink.style.display = 'flex';
+    }
+
     // Display Usage Quota and Active Plan
     const currentPlanEl = document.getElementById('currentPlanEl');
     if (currentPlanEl && user.subscriptionPlan) {

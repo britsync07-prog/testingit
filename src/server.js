@@ -115,7 +115,83 @@ app.use("/track", trackingLimiter, trackingRoutes);
 // 3. Mount secure Analytics API gateway (requires Auth)
 app.use("/api/sender", requireAuth, apiRoutes);
 
+// --- ADMIN MIDDLEWARE ---
+
+function requireAdmin(req, res, next) {
+  if (!req.session.user) return res.status(401).json({ error: "Not authenticated" });
+  const user = db.prepare("SELECT isAdmin FROM users WHERE id = ?").get(req.session.user.id);
+  if (!user || !user.isAdmin) return res.status(403).json({ error: "Admin access required" });
+  next();
+}
+
+// --- ADMIN API ROUTES ---
+
+// List / search all users
+app.get("/api/admin/users", requireAdmin, (req, res) => {
+  const q = req.query.q ? `%${req.query.q}%` : null;
+  let users;
+  if (q) {
+    users = db.prepare(`
+      SELECT id, username, email, subscriptionPlan, trialEndsAt, isAdmin, createdAt
+      FROM users WHERE username LIKE ? OR email LIKE ?
+      ORDER BY createdAt DESC
+    `).all(q, q);
+  } else {
+    users = db.prepare(`
+      SELECT id, username, email, subscriptionPlan, trialEndsAt, isAdmin, createdAt
+      FROM users ORDER BY createdAt DESC
+    `).all();
+  }
+  res.json({ users });
+});
+
+// Create user (admin)
+app.post("/api/admin/users", requireAdmin, async (req, res) => {
+  const { username, email, password, plan = "basic", isAdmin: makeAdmin = false } = req.body;
+  if (!username || !email || !password) return res.status(400).json({ error: "username, email and password are required" });
+  const result = await registerUser(username, email, password);
+  if (result.error) return res.status(400).json({ error: result.error });
+  // Update plan + admin flag right away
+  db.prepare("UPDATE users SET subscriptionPlan = ?, trialEndsAt = NULL, isAdmin = ? WHERE username = ?")
+    .run(plan, makeAdmin ? 1 : 0, username);
+  const newUser = db.prepare("SELECT id, username, email, subscriptionPlan, isAdmin, createdAt FROM users WHERE username = ?").get(username);
+  res.json({ user: newUser });
+});
+
+// Update subscription plan
+app.patch("/api/admin/users/:id/plan", requireAdmin, (req, res) => {
+  const { plan } = req.body;
+  const validPlans = ["free", "basic", "advance", "premium"];
+  if (!validPlans.includes(plan)) return res.status(400).json({ error: "Invalid plan" });
+  db.prepare("UPDATE users SET subscriptionPlan = ?, trialEndsAt = NULL WHERE id = ?").run(plan, req.params.id);
+  res.json({ success: true });
+});
+
+// Toggle admin role
+app.patch("/api/admin/users/:id/admin", requireAdmin, (req, res) => {
+  const { isAdmin: flag } = req.body;
+  db.prepare("UPDATE users SET isAdmin = ? WHERE id = ?").run(flag ? 1 : 0, req.params.id);
+  res.json({ success: true });
+});
+
+// Delete user
+app.delete("/api/admin/users/:id", requireAdmin, (req, res) => {
+  // Prevent self-deletion
+  if (req.params.id === req.session.user.id) return res.status(400).json({ error: "You cannot delete your own account" });
+  db.prepare("DELETE FROM users WHERE id = ?").run(req.params.id);
+  res.json({ success: true });
+});
+
+// Suspend / unsuspend user
+app.patch("/api/admin/users/:id/suspend", requireAdmin, (req, res) => {
+  const { suspended } = req.body;
+  if (req.params.id === req.session.user.id) return res.status(400).json({ error: "You cannot suspend your own account" });
+  db.prepare("UPDATE users SET isSuspended = ? WHERE id = ?").run(suspended ? 1 : 0, req.params.id);
+  res.json({ success: true });
+});
+
 // --- AUTH ROUTES ---
+
 
 app.post("/api/auth/register", async (req, res) => {
   const { username, email, password } = req.body;
@@ -219,6 +295,9 @@ app.get("/api/checkout/session", requireAuth, async (req, res) => {
 app.post("/api/login", async (req, res) => {
   const { username, password, rememberMe } = req.body;
   const user = await authenticate(username, password);
+  if (user && user.suspended) {
+    return res.status(403).json({ error: "Your account has been suspended. Please contact support." });
+  }
   if (user) {
     req.session.user = user;
     if (rememberMe) {
@@ -255,6 +334,7 @@ app.get("/api/me", (req, res) => {
       req.session.user.subscriptionPlan = freshUser.subscriptionPlan;
       req.session.user.trialEndsAt = freshUser.trialEndsAt;
       req.session.user.email = freshUser.email;
+      req.session.user.isAdmin = freshUser.isAdmin;
     }
 
     return res.json({
@@ -262,6 +342,7 @@ app.get("/api/me", (req, res) => {
       email: req.session.user.email,
       subscriptionPlan: req.session.user.subscriptionPlan,
       trialEndsAt: req.session.user.trialEndsAt,
+      isAdmin: freshUser ? !!freshUser.isAdmin : false,
       usage: usage,
       activeJobId: activeJob ? activeJob.id : null
     });

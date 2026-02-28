@@ -49,6 +49,11 @@ export async function authenticate(username, password) {
 
   if (user && (await bcrypt.compare(password, user.password))) {
 
+    // Block suspended accounts immediately at login
+    if (user.isSuspended) {
+      return { suspended: true };
+    }
+
     // Dynamic Trial Evaluation
     let activePlan = user.subscriptionPlan;
     if (user.trialEndsAt) {
@@ -117,6 +122,12 @@ export async function changePassword(username, currentPassword, newPassword) {
 
 export function requireAuth(req, res, next) {
   if (req.session && req.session.user) {
+    // Live suspension check — blocks users even if they're mid-session
+    const fresh = db.prepare("SELECT isSuspended FROM users WHERE id = ?").get(req.session.user.id);
+    if (fresh && fresh.isSuspended) {
+      req.session.destroy();
+      return res.status(403).json({ error: "Your account has been suspended. Please contact support." });
+    }
     return next();
   }
   return res.status(401).json({ error: "Unauthorized" });
