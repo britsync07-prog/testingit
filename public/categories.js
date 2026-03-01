@@ -111,6 +111,20 @@ function renderJobsList(categoryId) {
   jobs.forEach(job => {
     const date = new Date(job.createdAt).toLocaleString();
     const params = job.params;
+    const citiesList = params.cities || [];
+    const statesList = params.states || [];
+
+    let locationText = params.country;
+    if (statesList.length > 0) {
+      locationText += ` &ndash; ${statesList.join(", ")}`;
+    }
+
+    let citiesText = "";
+    if (citiesList.length > 5) {
+      citiesText = citiesList.slice(0, 5).join(", ") + ` (+${citiesList.length - 5} more)`;
+    } else {
+      citiesText = citiesList.join(", ");
+    }
 
     // Categorize files
     const emailFiles = (job.files || []).filter(f =>
@@ -135,8 +149,9 @@ function renderJobsList(categoryId) {
         <span class="status-chip ${job.status}">${job.status}</span>
         <span style="font-size:11px; color:var(--text-muted);">${date}</span>
       </div>
-      <div class="history-location" style="font-weight:600; font-size:14px; color:var(--text-primary); margin-top:10px;">
-        ${params.country} &ndash; ${params.cities.join(", ")}
+      <div class="history-location" title="${params.country} - ${params.cities.join(", ")}" style="font-weight:600; font-size:14px; color:var(--text-primary); margin-top:10px;">
+        <strong>${locationText}</strong><br>
+        <span style="font-size:0.9em; color:var(--text-muted); font-weight:400">${citiesText}</span>
       </div>
       <div style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">
         Niches: ${params.niches.join(", ")}

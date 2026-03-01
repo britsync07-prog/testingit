@@ -32,6 +32,10 @@ const kpiDeliveryRate = document.getElementById('kpiDeliveryRate');
 const kpiOpenRate = document.getElementById('kpiOpenRate');
 const kpiClickRate = document.getElementById('kpiClickRate');
 
+// History
+const historyTableBody = document.getElementById('historyTableBody');
+const btnRefreshHistory = document.getElementById('btnRefreshHistory');
+
 /**
  * Validates basic email formatting via regex
  */
@@ -213,6 +217,9 @@ btnLaunchCampaign.addEventListener('click', async () => {
       htmlTemplateEl.value = '';
 
       btnLaunchCampaign.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 2L11 13"></path><path d="M22 2L15 22L11 13L2 9L22 2Z"></path></svg> Launch Campaign`;
+
+      // Refresh KPIs and History after launch
+      loadKPIs();
     }
 
   } catch (error) {
@@ -263,7 +270,63 @@ const loadKPIs = async () => {
   } catch (err) {
     console.error("Failed to load KPIs:", err);
   }
+  // Also load history
+  loadHistory();
 };
+
+const loadHistory = async () => {
+  try {
+    const data = await fetchJson('/api/sender/analytics/history');
+    if (!data || !data.history) return;
+
+    if (!historyTableBody) return;
+    historyTableBody.innerHTML = '';
+
+    if (data.history.length === 0) {
+      historyTableBody.innerHTML = `<tr><td colspan="6" class="px-5 py-6 text-center text-brand-muted">No campaigns found</td></tr>`;
+      return;
+    }
+
+    data.history.forEach(camp => {
+      const tr = document.createElement('tr');
+      tr.className = 'hover:bg-slate-50 transition-colors';
+
+      let statusBadge = '';
+      if (camp.status === 'completed') {
+        statusBadge = '<span class="status-badge valid">Completed</span>';
+      } else if (camp.status === 'aborted') {
+        statusBadge = '<span class="status-badge invalid">Aborted</span>';
+      } else if (camp.status === 'sending') {
+        statusBadge = '<span class="status-badge pending">Sending...</span>';
+      } else {
+        statusBadge = `<span class="status-badge">${camp.status}</span>`;
+      }
+
+      const dateStr = new Date(camp.createdAt).toLocaleDateString() + ' ' + new Date(camp.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      tr.innerHTML = `
+        <td class="px-5 py-4 font-medium text-brand-text">${camp.name}</td>
+        <td class="px-5 py-4">${statusBadge}</td>
+        <td class="px-5 py-4 text-center font-mono">${camp.deliveredCount || 0}</td>
+        <td class="px-5 py-4 text-center font-mono">${camp.bouncedCount || 0}</td>
+        <td class="px-5 py-4 text-brand-muted text-xs">${dateStr}</td>
+        <td class="px-5 py-4">
+          ${camp.abortReason ? `<div class="text-xs text-red-500 max-w-xs break-words">${camp.abortReason}</div>` : `<span class="text-xs text-brand-muted">No errors logged</span>`}
+        </td>
+      `;
+      historyTableBody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error("Failed to load history:", err);
+    if (historyTableBody) {
+      historyTableBody.innerHTML = `<tr><td colspan="6" class="px-5 py-6 text-center text-red-500">Failed to load history</td></tr>`;
+    }
+  }
+};
+
+if (btnRefreshHistory) {
+  btnRefreshHistory.addEventListener('click', loadKPIs);
+}
 
 // --- INIT ---
 async function init() {

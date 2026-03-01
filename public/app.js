@@ -484,6 +484,20 @@ async function loadHistory() {
       div.className = "history-item";
       const date = new Date(job.createdAt).toLocaleString();
       const params = job.params;
+      const citiesList = params.cities || [];
+      const statesList = params.states || [];
+      
+      let locationText = params.country;
+      if (statesList.length > 0) {
+        locationText += ` &ndash; ${statesList.join(", ")}`;
+      }
+      
+      let citiesText = "";
+      if (citiesList.length > 5) {
+        citiesText = citiesList.slice(0, 5).join(", ") + ` (+${citiesList.length - 5} more)`;
+      } else {
+        citiesText = citiesList.join(", ");
+      }
 
       const fileList = (job.files || []);
 
@@ -532,7 +546,10 @@ async function loadHistory() {
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <span class="history-date">${date}</span>
             </div>
-            <div class="history-location">${params.country} &ndash; ${params.cities.join(", ")}</div>
+            <div class="history-location" title="${params.country} - ${params.cities.join(", ")}">
+               <strong>${locationText}</strong><br>
+               <span style="font-size:0.9em; color:var(--text-muted)">${citiesText}</span>
+            </div>
             <div class="history-niches">${params.niches.join(" &middot; ")}</div>
           </div>
           <div class="history-actions">

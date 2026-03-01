@@ -46,7 +46,8 @@ const injectTrackingHtml = (rawHtml, recipientId, hostUrl) => {
 };
 
 /**
- * Dispatches an email through the user's SMTP and returns a boolean indicating actual delivery success.
+ * Dispatches an email through the user's SMTP.
+ * Returns { ok: true } on success or { ok: false, error: '...' } on failure.
  */
 const sendEmail = async (transporter, fromData, toEmail, subject, trackedHtml) => {
     try {
@@ -58,10 +59,10 @@ const sendEmail = async (transporter, fromData, toEmail, subject, trackedHtml) =
         });
 
         console.log(`[SMTP] Sent to ${toEmail}: ${info.messageId}`);
-        return true;
+        return { ok: true };
     } catch (error) {
         console.error(`[SMTP ERROR] Failed to send to ${toEmail}: ${error.message}`);
-        return false;
+        return { ok: false, error: error.message };
     }
 };
 

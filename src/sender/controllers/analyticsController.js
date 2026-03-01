@@ -34,6 +34,9 @@ const getCampaignAnalytics = (req, res) => {
       )
     `).get(campaignId);
 
+    // 3. Fetch campaign status and abort reason
+    const campaignMeta = db.prepare(`SELECT status, abortReason FROM campaigns WHERE id = ?`).get(campaignId);
+
     const sent = recipientStats.totalSent || 0;
     const delivered = recipientStats.deliveredCount || 0;
     const bounced = recipientStats.bouncedCount || 0;
@@ -42,7 +45,7 @@ const getCampaignAnalytics = (req, res) => {
     const clicks = eventStats.uniqueClicks || 0;
     const visits = eventStats.uniqueVisits || 0;
 
-    // 3. Calculate Derived Ratios
+    // 4. Calculate Derived Ratios
     // Protect against division by zero
     const deliveryRate = sent > 0 ? (delivered / sent) * 100 : 0;
     const bounceRate = sent > 0 ? (bounced / sent) * 100 : 0;
@@ -55,6 +58,8 @@ const getCampaignAnalytics = (req, res) => {
 
     res.json({
       campaignId,
+      status: campaignMeta?.status || 'unknown',
+      abortReason: campaignMeta?.abortReason || null,
       rawCounts: {
         sent,
         delivered,
@@ -141,7 +146,33 @@ const getAccountAnalytics = (req, res) => {
   }
 };
 
+const getCampaignHistory = (req, res) => {
+  const userId = req.session?.user?.username || req.session?.user?.id || 'admin_user';
+
+  try {
+    const history = db.prepare(`
+      SELECT 
+        id, 
+        name, 
+        status, 
+        abortReason, 
+        deliveredCount, 
+        bouncedCount, 
+        createdAt
+      FROM campaigns
+      WHERE userId = ?
+      ORDER BY createdAt DESC
+    `).all(userId);
+
+    res.json({ history });
+  } catch (error) {
+    console.error(`[Analytics Controller] Error fetching campaign history: ${error.message}`);
+    res.status(500).json({ error: 'Failed to fetch campaign history.' });
+  }
+};
+
 export {
   getCampaignAnalytics,
-  getAccountAnalytics
+  getAccountAnalytics,
+  getCampaignHistory
 };

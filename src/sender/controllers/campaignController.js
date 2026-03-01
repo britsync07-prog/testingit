@@ -2,6 +2,14 @@ import db from '../models/db.js';
 import { createTransporter, injectTrackingHtml, sendEmail } from '../services/mailer.js';
 import { v4 as uuidv4 } from 'uuid';
 
+// Ensure abort-related columns exist (safe to run every boot)
+try { db.exec(`ALTER TABLE campaigns ADD COLUMN abortReason TEXT`); } catch { }
+try { db.exec(`ALTER TABLE campaigns ADD COLUMN deliveredCount INTEGER DEFAULT 0`); } catch { }
+try { db.exec(`ALTER TABLE campaigns ADD COLUMN bouncedCount INTEGER DEFAULT 0`); } catch { }
+try { db.exec(`ALTER TABLE recipients ADD COLUMN error TEXT`); } catch { }
+
+const MAX_CONSECUTIVE_FAILURES = 4;
+
 /**
  * Validates the SMTP credentials by attempting a connection before processing the campaign.
  */
@@ -48,7 +56,6 @@ const launchCampaign = async (req, res) => {
 
         // 3. Initialize Campaign in SQLite
         const campaignId = uuidv4();
-        // Extract the actual logged-in username, or fallback to the session ID if it's an API key
         const userId = req.session?.user?.username || req.session?.user?.id || 'admin_user';
 
         db.prepare(`INSERT INTO campaigns (id, userId, name, status) VALUES (?, ?, ?, 'sending')`)
@@ -61,12 +68,15 @@ const launchCampaign = async (req, res) => {
             totalRecipients: recipients.length
         });
 
-        // 5. Asynchronous Delivery Worker Queue
+        // 5. Asynchronous Delivery Worker with Consecutive-Failure Abort
         process.nextTick(async () => {
-            const hostUrl = `${req.protocol}://${req.get('host')}`; // e.g. http://localhost:3000
+            const hostUrl = `${req.protocol}://${req.get('host')}`;
 
             let deliveredCount = 0;
-            let failedCount = 0;
+            let bouncedCount = 0;
+            let consecutiveFails = 0;
+            let aborted = false;
+            let lastError = '';
 
             for (const email of recipients) {
                 const recipientId = uuidv4();
@@ -79,37 +89,56 @@ const launchCampaign = async (req, res) => {
                 const trackedHtml = injectTrackingHtml(htmlContent, recipientId, hostUrl);
 
                 // Dispatch
-                const success = await sendEmail(transporter, { name: senderName, email: smtpUser }, email, subject, trackedHtml);
+                const result = await sendEmail(transporter, { name: senderName, email: smtpUser }, email, subject, trackedHtml);
 
-                if (success) {
+                if (result.ok) {
                     db.prepare(`UPDATE recipients SET status = 'delivered', sentAt = CURRENT_TIMESTAMP WHERE id = ?`)
                         .run(recipientId);
-
-                    // Simulate the webhook 'DELIVERED' event immediately since we bypassed relying on external notifications
                     db.prepare(`INSERT INTO event_logs (id, eventId, campaignId, recipientId, eventType, ipAddress, userAgent)
                                 VALUES (?, ?, ?, ?, 'DELIVERED', '127.0.0.1', 'Native SMTP Queue')`)
                         .run(uuidv4(), recipientId, campaignId, recipientId);
 
                     deliveredCount++;
+                    consecutiveFails = 0; // reset streak on any success
                 } else {
-                    db.prepare(`UPDATE recipients SET status = 'bounced', sentAt = CURRENT_TIMESTAMP WHERE id = ?`)
-                        .run(recipientId);
-
-                    // Simulate webhook 'BOUNCED'
+                    const errorMsg = result.error || 'Unknown SMTP error';
+                    db.prepare(`UPDATE recipients SET status = 'bounced', error = ?, sentAt = CURRENT_TIMESTAMP WHERE id = ?`)
+                        .run(errorMsg, recipientId);
                     db.prepare(`INSERT INTO event_logs (id, eventId, campaignId, recipientId, eventType, ipAddress, userAgent)
                                 VALUES (?, ?, ?, ?, 'BOUNCED', '127.0.0.1', 'Native SMTP Queue')`)
                         .run(uuidv4(), recipientId, campaignId, recipientId);
 
-                    failedCount++;
+                    bouncedCount++;
+                    consecutiveFails++;
+                    lastError = errorMsg;
+
+                    // ⛔ Abort after MAX_CONSECUTIVE_FAILURES in a row
+                    if (consecutiveFails >= MAX_CONSECUTIVE_FAILURES) {
+                        aborted = true;
+                        console.warn(`[Campaign ${campaignId}] ⛔ Aborted after ${MAX_CONSECUTIVE_FAILURES} consecutive failures. Last error: ${lastError}`);
+                        break;
+                    }
                 }
 
-                // Slight delay to prevent spamming the SMTP server block limits
-                await new Promise(r => setTimeout(r, 100)); // 10 emails / second max throughput
+                // 🔄 Update progress in DB (optional but helpful for long queues)
+                db.prepare(`UPDATE campaigns SET deliveredCount = ?, bouncedCount = ? WHERE id = ?`)
+                    .run(deliveredCount, bouncedCount, campaignId);
+
+                // ⏳ 5-second delay between every email sending as requested
+                await new Promise(r => setTimeout(r, 5000));
             }
 
-            // Mark Campaign Completed
-            db.prepare(`UPDATE campaigns SET status = 'completed' WHERE id = ?`).run(campaignId);
-            console.log(`[Campaign ${campaignId}] Completed. Delivered: ${deliveredCount}. Failed: ${failedCount}.`);
+            // 6. Mark campaign final status + persist counts + abort reason
+            if (aborted) {
+                const abortMsg = `Stopped after ${MAX_CONSECUTIVE_FAILURES} consecutive SMTP failures. Last error: ${lastError}`;
+                db.prepare(`UPDATE campaigns SET status = 'aborted', abortReason = ?, deliveredCount = ?, bouncedCount = ? WHERE id = ?`)
+                    .run(abortMsg, deliveredCount, bouncedCount, campaignId);
+                console.log(`[Campaign ${campaignId}] Aborted. Sent: ${deliveredCount}, Bounced: ${bouncedCount}.`);
+            } else {
+                db.prepare(`UPDATE campaigns SET status = 'completed', deliveredCount = ?, bouncedCount = ? WHERE id = ?`)
+                    .run(deliveredCount, bouncedCount, campaignId);
+                console.log(`[Campaign ${campaignId}] Completed. Delivered: ${deliveredCount}, Bounced: ${bouncedCount}.`);
+            }
         });
 
     } catch (error) {
